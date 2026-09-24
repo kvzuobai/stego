@@ -11,7 +11,7 @@ A vault whose risk rules are **TapeOut circuits**. Before every deposit, withdra
 | `web/index.html` | Demo dashboard: one static file, live X Layer data, no backend. Open it directly or host it anywhere. |
 | `LAUNCH_CHECKLIST.md` | Exact launch commands in order for the current wallet budget, all rehearsed |
 
-**Live site:** https://stego-jade.vercel.app/ · **Deployed contracts and transaction evidence:** [DEPLOYMENTS.md](DEPLOYMENTS.md)
+**Live site:** https://stego-jade.vercel.app/ · **Source:** https://github.com/kvzuobai/stego · **Deployed contracts and transaction evidence:** [DEPLOYMENTS.md](DEPLOYMENTS.md)
 
 ## Build and test
 ```bash
