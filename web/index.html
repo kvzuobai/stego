@@ -252,6 +252,7 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
             <div><div class="k">If you hold to the end</div><div class="v" id="nProj">…</div></div>
           </div>
           <div class="hint" id="nShare"></div>
+          <a class="btn ghost" id="nTweet" target="_blank" rel="noopener" style="display:none;margin-top:10px;text-decoration:none">Share on X</a>
           <div class="act">
             <label for="nJoinAmt">Join / top up (OKB)</label>
             <div class="row2"><input id="nJoinAmt" type="number" min="0.01" max="0.05" step="0.001" value="0.05"><button class="btn" id="nJoinBtn" type="button">Join</button></div>
@@ -686,6 +687,7 @@ const ZH = {
   "#": "#",
   "Player": "玩家",
   "Pot share": "奖池份额",
+  "Share on X": "分享到 X",
   "(you)": "（你）",
   "No players yet. Be the first: early joiners get the biggest share.": "还没有玩家。抢先加入：越早加入份额越大。",
   "Is Nerve really \"no-loss\"?": "Nerve 真的是「保本」的吗？",
@@ -1444,8 +1446,13 @@ async function nerveSeat() {
     }
     const pct = tw > 0n ? Number((myW * 10000n) / tw) / 100 : 0;
     $("nShare").textContent = `Your share of the pot: ${pct.toFixed(1)}% of all pot weight` + diamondLine;
+    const gain = mine > 0n ? Number(((proj[1]) * 10000n) / mine) / 100 : 0;
+    const text = `I'm holding my nerve in ${($("nTitle").textContent || "Stego Nerve").trim()} on X Layer: ${pct.toFixed(1)}% of the pot, +${gain.toFixed(1)}% if everyone stays. A TapeOut circuit decides who gets out, and my deposit stays mine.`;
+    $("nTweet").href = "https://x.com/intent/post?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent("https://stego-jade.vercel.app/");
+    $("nTweet").style.display = "inline-block";
   } else {
     $("nShare").textContent = "";
+    $("nTweet").style.display = "none";
   }
   const now = await chainNow();
   const ended = N.st && now >= N.st.end;
