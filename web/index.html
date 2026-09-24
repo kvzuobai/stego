@@ -68,7 +68,7 @@ html, body { margin: 0; }
 body {
   background: var(--bg);
   color: var(--ink);
-  font: 15px/1.55 Inter, system-ui, sans-serif;
+  font: 15px/1.55 Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
@@ -84,7 +84,11 @@ header.top .wrap { display: flex; align-items: center; justify-content: space-be
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
 .dot.ok { background: var(--allow); box-shadow: 0 0 0 3px color-mix(in srgb, var(--allow) 25%, transparent); }
 .dot.err { background: var(--halt); }
-.theme-btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 8px; padding: 5px 9px; cursor: pointer; font: inherit; font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--surface); }
+.seg-btn { border: 0; background: transparent; color: var(--ink-2); padding: 5px 10px; cursor: pointer; font: 600 13px Inter, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.3; }
+.seg-btn + .seg-btn { border-left: 1px solid var(--line); }
+.seg-btn.on { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 520px) { .live #netTxt { display: none; } header.top .wrap { gap: 8px; } }
 
 .hero { padding: 44px 0 28px; }
 .hero h1 { font-size: clamp(28px, 4.2vw, 44px); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 14px; max-width: 820px; }
@@ -193,7 +197,12 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
     </div>
     <div style="display:flex;gap:12px;align-items:center">
       <span class="live"><span class="dot" id="netDot"></span><span id="netTxt">Connecting to X Layer…</span></span>
-      <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" id="langEn" class="seg-btn">EN</button><button type="button" id="langZh" class="seg-btn">中文</button>
+      </div>
+      <div class="seg" role="group" aria-label="Theme">
+        <button type="button" id="themeLight" class="seg-btn" title="Light">☀️</button><button type="button" id="themeDark" class="seg-btn" title="Dark">🌙</button>
+      </div>
     </div>
   </div>
 </header>
@@ -363,7 +372,7 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
       </div>
       <div class="card">
         <h2>Try to break it</h2>
-        <p class="sub">Fire random inputs at the live circuit and check its answers. Once the policy registry launches, anyone who finds an answer outside the safety envelope, or a bigger withdrawal that gets a softer verdict than a smaller one, takes the author's transistor bond.</p>
+        <p class="sub">Fire random inputs at the live circuit and check its answers. Anyone who finds an answer outside the safety envelope, or a bigger withdrawal that gets a softer verdict than a smaller one, takes the author's transistor bond.</p>
         <button class="btn" id="breakBtn" type="button">Run 400 on-chain evals</button>
         <div class="bar"><div id="breakBar"></div></div>
         <div class="stats-line" id="breakTxt">No run yet.</div>
@@ -374,13 +383,13 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
   </section>
 
   <section>
-    <h2>Roadmap to a live vault</h2>
-    <p class="sub">What is live on mainnet, and what is built and tested but waiting to be deployed.</p>
+    <h2>What's live</h2>
+    <p class="sub">Everything below is deployed on X Layer mainnet. Next on the roadmap: recurring funded seasons and real yield for the vault.</p>
     <div class="pipeline">
       <div class="step"><div class="st live">Live</div><h3>Nerve Season 1</h3><p>The bank-run game, using live circuit #1 as its exit rule. Joins close 28 Sep, 18:24 UTC+7; the season ends 1 Oct, 18:24 UTC+7.</p></div>
       <div class="step"><div class="st live">Live</div><h3>Processor + WITHDRAW_GUARD</h3><p>Created through the TapeOut factory. Circuit #1 taped out and verified against the spec on mainnet.</p></div>
-      <div class="step"><div class="st ready">Built · proven · ready</div><h3>DRAWDOWN_BREAKER + ALLOCATION_BAND</h3><p>161 and 246 gates, both exhaustively proven. Tape-out is next.</p></div>
-      <div class="step"><div class="st ready">Built · tested · ready</div><h3>PolicyRegistry + StegoVault (with web page)</h3><p>Safety envelopes, transistor bonds, curator approval, 24 h timelock, counterexample slashing, and protection against TapeOut code upgrades. Full flow passes on an X Layer fork.</p></div>
+      <div class="step"><div class="st live">Live</div><h3>DRAWDOWN_BREAKER + ALLOCATION_BAND</h3><p>161 and 246 gates, taped out and verified on mainnet.</p></div>
+      <div class="step"><div class="st live">Live</div><h3>PolicyRegistry + StegoVault</h3><p>Deployed on mainnet with 6,000 STEGO bonded. The rules switch on after a 24-hour timelock; the vault opens as soon as they do.</p></div>
     </div>
   </section>
 
@@ -466,7 +475,7 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
           <li><b>Checkers</b> earn the bond of any circuit they prove wrong.</li>
           <li><b>People who stay in the pool</b> keep the 1% THROTTLE fees paid by people rushing out.</li>
         </ul>
-        <p>Honest note: none of these produce meaningful income until the vault holds real deposits. The vault is not live yet (see the roadmap).</p>
+        <p>Honest note: none of these produce meaningful income until the vault holds real deposits, and the vault earns no yield yet (that's on the roadmap).</p>
       </div></details>
 
       <details><summary>How do I use the vault?</summary><div class="ans">
@@ -489,8 +498,8 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
       </div></details>
 
       <details><summary>What is live today, and what is not?</summary><div class="ans">
-        <p><b>Live on X Layer:</b> the Stego processor and the withdrawal-limit circuit (#1). Everything in the live panel above is read directly from the blockchain.</p>
-        <p><b>Built and tested, not yet deployed:</b> two more circuits, the rules registry and the vault itself.</p>
+        <p><b>Live on X Layer:</b> the Stego processor, all three rule circuits, the rule registry, the vault and Nerve Season 1. Everything on this page is read directly from the blockchain.</p>
+        <p><b>Coming next:</b> recurring funded seasons, and real yield for the vault (it holds no strategy yet).</p>
       </div></details>
 
       <details><summary>What are the risks?</summary><div class="ans">
@@ -533,6 +542,423 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
 </footer>
 
 <script>
+// ---------------------------------------------------------------- EN / 中文
+// English is the source text in the page. When 中文 is on, every visible text node is translated:
+// exact matches from ZH, otherwise the first matching pattern in ZH_PATTERNS. A MutationObserver
+// translates text the live code writes later, so dynamic messages switch language too.
+const ZH = {
+  "Connecting to X Layer…": "正在连接 X Layer…",
+  "X Layer RPC unreachable": "无法连接 X Layer 节点",
+  "Vault risk rules, etched into silicon on X Layer.": "把金库的风控规则，刻进 X Layer 上的芯片。",
+  "Stego vaults obey NAND circuits taped out on TapeOut. Every withdrawal, deposit and rebalance asks a circuit for a verdict through": "Stego 金库服从在 TapeOut 上流片的与非门电路。每一次取款、存款和调仓，都要先通过",
+  ". Every circuit is proven correct over all 65,536 inputs. Everything on this page is read live from X Layer mainnet.": "向电路请求裁决。每个电路都在全部 65,536 种输入上被证明正确。本页所有数据都实时读取自 X Layer 主网。",
+  "Play Nerve, the bank-run game →": "玩 Nerve：挤兑博弈游戏 →",
+  "· New to this?": "· 第一次来？",
+  "Read the plain-language FAQ": "先看通俗版常见问题",
+  ". No crypto or chip knowledge needed.": "，不需要任何加密或芯片知识。",
+  "Processor": "处理器",
+  "Circuits taped out": "已流片电路",
+  "flat NAND, 16 in → 2 out": "纯与非门，16 输入 → 2 输出",
+  "Transistors minted": "已铸造晶体管",
+  "Burned into silicon": "已烧入硅片",
+  "1 transistor per gate": "每个门消耗 1 颗晶体管",
+  ", the bank-run game": "：挤兑博弈游戏",
+  "Nerve: Season 1": "Nerve：第一季",
+  "Stego Nerve - Season 1": "Stego Nerve · 第一季",
+  "Put in a small amount of OKB. Anyone can leave at any time, but": "投入少量 OKB。任何人都可以随时离场，但",
+  "the live circuit sets the price of leaving": "离场的代价由链上电路实时决定",
+  ", and every fee goes into a pot. When the season ends, everyone who held their nerve gets their deposit back plus a share of the pot.": "，所有费用都进入奖池。赛季结束时，坚持到底的人拿回全部本金，并按份额分享奖池。",
+  "1 · Join": "1 · 加入",
+  "Deposit 0.01–0.05 OKB": "存入 0.01–0.05 OKB",
+  "Joining also mints and burns a 10-STEGO ticket in the same transaction (": "加入时会在同一笔交易里铸造并销毁 10 枚 STEGO 作为门票（",
+  "OKB). Top-ups need no new ticket.": "OKB）。追加存款不需要再买门票。",
+  "2 · Hold or fold": "2 · 坚持还是离场",
+  "Leaving costs you": "离场要付费",
+  "Calm day: 2% into the pot. Rush (THROTTLE): 10%. If today's exit allowance (~25% of the pool) is used up, you wait until tomorrow.": "平静的日子：2% 进奖池。挤兑时（THROTTLE）：10%。如果当天的离场额度（约奖池的 25%）用完，就要等到明天。",
+  "3 · Stayers win": "3 · 坚持者赢",
+  "Split the pot": "瓜分奖池",
+  "At the end, stayers share the pot by OKB × time committed, so": "赛季结束时，坚持者按「OKB × 投入时长」分配奖池，所以",
+  "joining early earns more": "越早加入分得越多",
+  ". 10% goes to the designer of the exit-rule circuit.": "。10% 归离场规则电路的设计者。",
+  "Season status": "赛季状态",
+  "open to join": "开放加入中",
+  "holding, no new joins": "持仓阶段，停止加入",
+  "settled": "已结算",
+  "ended, claim open": "已结束，可以领取",
+  "not deployed yet": "尚未部署",
+  "Pot": "奖池",
+  "Players in": "参与人数",
+  "Pool": "资金池",
+  "Today's exits": "今日离场",
+  "Join closes": "加入截止",
+  "Season ends": "赛季结束",
+  "ended": "已结束",
+  ". Contract:": "。合约：",
+  "Your seat": "我的席位",
+  "Connect wallet": "连接钱包",
+  "Opens at Season 1 launch": "第一季上线后开放",
+  "Opens when the vault launches": "金库上线后开放",
+  "Your deposit": "我的存款",
+  "If you hold to the end": "坚持到底可得",
+  "Join / top up (OKB)": "加入 / 追加（OKB）",
+  "Join": "加入",
+  "Leave (OKB)": "离场（OKB）",
+  "Leave": "离场",
+  "Enter an amount to see what the circuit charges.": "输入金额，查看电路会收多少费用。",
+  "Enter a valid amount.": "请输入有效金额。",
+  "STEGO Boost: burn STEGO to raise your pot share (+5% per 10 STEGO, up to +50%)": "STEGO 加成：销毁 STEGO 提高奖池份额（每 10 枚 +5%，最高 +50%）",
+  "Boost": "加成",
+  "max boost reached": "已达最高加成",
+  "You already have the maximum +50% boost.": "你已经拥有最高 +50% 加成。",
+  "worth it right now": "现在买划算",
+  "costs more than it adds right now": "现在买不划算",
+  ". More players joining changes this.": "。更多玩家加入会改变这个结果。",
+  "Add to the pot (anyone can sponsor; this cannot be taken back)": "注资奖池（任何人都可以赞助，注入后无法取回）",
+  "Add to pot": "注资奖池",
+  "Goes to the players still in at the end (10% to the exit-rule designer). If nobody stays, it all goes to the designer.": "归坚持到最后的玩家（10% 归离场规则设计者）。如果没人坚持，全部归设计者。",
+  "Claim deposit + pot share": "领取本金 + 奖池份额",
+  "You already have a ticket, so no ticket cost.": "你已有门票，无需再付门票费。",
+  ". Based on who has joined so far: more players joining will shrink this, people leaving early will grow it, and joining later earns less.": "。按目前的参与者计算：更多人加入会降低收益，有人提前离场会提高收益，越晚加入收益越少。",
+  "Stego Vault: savings with circuit-enforced rules": "Stego 金库：由电路强制执行规则的储蓄池",
+  "Deposit OKB and receive vault shares. Every deposit and withdrawal asks the live circuits for a verdict first. Deposits pay a 0.1% fee that goes to the rule designers. Withdrawals are free up to ~10% of the vault per day, cost 1% up to ~25% (the fee stays with the people who remain), and beyond that wait for the next day.": "存入 OKB，获得金库份额。每一笔存取款都要先问链上电路。存款收取 0.1% 手续费，归规则设计者。取款每天在金库约 10% 以内免费，约 25% 以内收 1%（费用留给剩下的人），超过部分要等到第二天。",
+  "Vault status": "金库状态",
+  "all rules live": "规则全部生效",
+  "launches with phase 2": "第二阶段上线",
+  "TapeOut upgraded: safety mode": "TapeOut 已升级：安全模式",
+  "Total deposited": "总存款",
+  "Share price": "份额价格",
+  "Room under cap": "剩余额度",
+  "Withdrawn today": "今日已取",
+  "Deposits": "存款",
+  "paused": "已暂停",
+  "open": "开放",
+  "open (de-risk)": "开放（降风险模式）",
+  "Rules live": "生效规则",
+  "Share price starts at 1 and rises only if the vault earns; entry fees go to rule designers, not to the price. Vault:": "份额价格从 1 开始，只有金库产生收益才会上涨；入场费归规则设计者，不计入价格。金库：",
+  "TapeOut has changed its processor code, so the vault stopped trusting circuit verdicts: withdrawals stay open, deposits pause until the curator reviews the change. Vault:": "TapeOut 修改了处理器代码，金库已暂停信任电路裁决：取款保持开放，存款暂停，直到管理者审核完这次变更。金库：",
+  "· Registry:": "· 注册表：",
+  "The vault and rule registry are built and fully rehearsed on a mainnet fork. They go live once circuits #2 and #3 are taped out.": "金库和规则注册表已完成，并在主网分叉上完整演练过，电路 #2 和 #3 流片后上线。",
+  "Could not read the vault (RPC busy). Retrying shortly.": "暂时读不到金库（节点繁忙），稍后自动重试。",
+  "Could not read the season (RPC busy). Retrying shortly.": "暂时读不到赛季数据（节点繁忙），稍后自动重试。",
+  "Season 1 has not been deployed yet. The rules above are final and fully tested against the live circuit on a mainnet fork.": "第一季尚未部署。上面的规则已经确定，并已在主网分叉上对照链上电路完整测试。",
+  "Your vault position": "我的金库仓位",
+  "Your balance": "我的余额",
+  "Max out today": "今日最多可取",
+  "Deposit (OKB)": "存款（OKB）",
+  "Deposit": "存款",
+  "Three wallet steps: wrap OKB → approve → deposit.": "钱包里分三步：包装 OKB → 授权 → 存入。",
+  "Three wallet steps: wrap OKB → approve → deposit. A 0.1% entry fee goes to the rule designers.": "钱包里分三步：包装 OKB → 授权 → 存入。0.1% 入场费归规则设计者。",
+  "Deposits are paused by the drawdown circuit.": "回撤电路已暂停存款。",
+  "Withdraw (OKB)": "取款（OKB）",
+  "Withdraw": "取款",
+  "Enter an amount to see the circuit's verdict.": "输入金额，查看电路的裁决。",
+  "Rule slots (PolicyRegistry)": "规则插槽（PolicyRegistry）",
+  "Each slot holds one circuit. Its author bonded STEGO that anyone can claim by proving the circuit breaks its safety envelope. Changes need curator approval plus a 24-hour wait.": "每个插槽放一个电路。作者质押了 STEGO，任何人只要证明电路违反了安全包络，就能拿走这笔押金。任何变更都要管理者批准，并等待 24 小时。",
+  "empty": "空",
+  "Not deployed yet": "尚未部署",
+  "Circuit #1 is live; #2 and #3 are ready to tape out.": "电路 #1 已上线；#2 和 #3 待流片。",
+  "Loading…": "加载中…",
+  "Loading on-chain story…": "正在加载链上故事…",
+  "The bank-run game, using live circuit #1 as its exit rule. Joins close 28 Sep, 18:24 UTC+7; the season ends 1 Oct, 18:24 UTC+7.": "挤兑博弈游戏，以链上电路 #1 作为离场规则。9 月 28 日 18:24（UTC+7）停止加入，10 月 1 日 18:24（UTC+7）赛季结束。",
+  "Live policy: WITHDRAW_GUARD_V1 (circuit #1)": "链上规则：WITHDRAW_GUARD_V1（电路 #1）",
+  "Move the sliders to set the vault's state. The page evaluates the live circuit on mainnet, and separately re-simulates the netlist bytes it downloaded from the chain, gate by gate. Both must agree.": "拖动滑块设置金库状态。页面会在主网上调用链上电路求值，同时把从链上下载的网表逐门重新模拟一遍。两者必须一致。",
+  "A: already withdrawn this epoch": "A：本周期已取出",
+  "B: this withdrawal request": "B：本次取款请求",
+  "Evaluating on-chain…": "正在链上求值…",
+  "Within the free daily exit budget (≤ ~10% of TVL).": "在每日免费离场额度内（≤ 约 10% TVL）。",
+  "Above the free budget: allowed, and a 1% fee stays with the remaining LPs.": "超出免费额度：允许，1% 手续费留给剩余的存款人。",
+  "Over ~25% of TVL this epoch: this request must wait for the next epoch.": "本周期已超过约 25% TVL：这笔请求要等到下个周期。",
+  "Could not reach X Layer RPC. Retrying on next change.": "无法连接 X Layer 节点，下次操作时重试。",
+  "Could not load chain data. Refresh to retry.": "无法加载链上数据，请刷新重试。",
+  "16 input pins: A (pins 0–7), B (pins 8–15), LSB first": "16 个输入引脚：A（引脚 0–7）、B（引脚 8–15），低位在前",
+  "2 output pins → verdict = pin0 + 2·pin1": "2 个输出引脚 → 裁决 = pin0 + 2·pin1",
+  "On-chain": "链上",
+  "In-browser simulation of on-chain netlist": "浏览器内模拟链上网表",
+  "This design's exact rule": "本设计的精确规则",
+  "Safety envelope (what any design must obey)": "安全包络（所有设计都必须遵守）",
+  "must ALLOW here ✓": "此处必须 ALLOW ✓",
+  "must not HALT here ✓": "此处不得 HALT ✓",
+  "must not ALLOW here ✓": "此处不得 ALLOW ✓",
+  "designer's choice ✓": "由设计者决定 ✓",
+  "Agreement": "一致性",
+  "✓ chain = simulation = design, inside envelope": "✓ 链上 = 模拟 = 设计，且在安全包络内",
+  "✗ mismatch: counterexample!": "✗ 不一致：发现反例！",
+  "RPC error": "节点错误",
+  "Die view: each square is one of the circuit's": "裸片视图：每个方块是电路里的一个与非门，共",
+  "NAND gates, lit when its output is 1 for the current input. Taping out burned one STEGO transistor for each of them.": "个；当前输入下输出为 1 的门会亮起。流片时每个门都烧掉了一枚 STEGO 晶体管。",
+  "Verdict map": "裁决全景图",
+  "All 65,536 inputs, computed from the on-chain netlist. X axis = A, Y axis = B. The crosshair is your slider position.": "全部 65,536 种输入，由链上网表计算得出。横轴 = A，纵轴 = B，十字线是滑块的位置。",
+  "ALLOW, under ~10% of TVL per day": "ALLOW：每天约 10% TVL 以内",
+  "THROTTLE, 1% fee stays with LPs": "THROTTLE：1% 手续费留给存款人",
+  "HALT, wait for the next epoch": "HALT：等待下个周期",
+  "Try to break it": "来找茬",
+  "Fire random inputs at the live circuit and check its answers. Anyone who finds an answer outside the safety envelope, or a bigger withdrawal that gets a softer verdict than a smaller one, takes the author's transistor bond.": "向链上电路随机发送输入并检查答案。谁能找到一个超出安全包络的答案，或者发现大额取款得到的裁决反而比小额更宽松，就能拿走作者质押的晶体管。",
+  "Run 400 on-chain evals": "运行 400 次链上求值",
+  "No run yet.": "尚未运行。",
+  "The circuit held.": "电路经受住了考验。",
+  "RPC busy or unreachable. Try again in a moment.": "节点繁忙或无法连接，请稍后再试。",
+  "What's live": "已上线内容",
+  "Everything below is deployed on X Layer mainnet. Next on the roadmap: recurring funded seasons and real yield for the vault.": "以下内容都已部署在 X Layer 主网。路线图的下一步：持续有资金支持的赛季，以及为金库接入真实收益。",
+  "Live": "已上线",
+  "Nerve Season 1": "Nerve 第一季",
+  "Processor + WITHDRAW_GUARD": "处理器 + WITHDRAW_GUARD",
+  "Created through the TapeOut factory. Circuit #1 taped out and verified against the spec on mainnet.": "通过 TapeOut 工厂创建。电路 #1 已流片，并在主网上对照规范验证。",
+  "161 and 246 gates, taped out and verified on mainnet.": "161 个门和 246 个门，已流片并在主网上验证。",
+  "Deployed on mainnet with 6,000 STEGO bonded. The rules switch on after a 24-hour timelock; the vault opens as soon as they do.": "已部署在主网，质押了 6,000 枚 STEGO。规则在 24 小时时间锁后生效，金库随即开放。",
+  "25% commitment tracker": "25% 承诺追踪",
+  "The creator publicly committed, in the on-chain story, to stream 25% of transistor mint proceeds to the authors of active policies. Anyone can check it here.": "创建者在链上故事里公开承诺：把晶体管铸造收入的 25% 分给在役规则的作者。任何人都可以在这里核对。",
+  "Mint proceeds so far": "累计铸造收入",
+  "25% owed to authors": "应付作者的 25%",
+  "Streamed so far": "已支付",
+  "Streamed so far is read from PolicyRegistry.notifiedBy(creator). The creator tops it up with the HonourCommitment script.": "「已支付」读取自 PolicyRegistry.notifiedBy(creator)。创建者用 HonourCommitment 脚本补足差额。",
+  "Commitment fully honoured. The streamed total is recorded on-chain in PolicyRegistry.notifiedBy(creator).": "承诺已全部兑现。已支付总额记录在链上的 PolicyRegistry.notifiedBy(creator) 中。",
+  "The policy registry is not deployed yet, so nothing can be streamed. The owed amount carries forward and will be paid when it launches. All mints so far are the creator's own bootstrap mints for circuit #1.": "规则注册表尚未部署，暂时无法支付。应付金额会累计，在注册表上线后支付。目前所有铸造都是创建者为电路 #1 做的启动铸造。",
+  "Design the next season's exit rule": "设计下一季的离场规则",
+  "Every Nerve season runs on one exit-rule circuit, and its designer earns": "每个 Nerve 赛季都运行在一个离场规则电路上，它的设计者可获得",
+  "10% of that season's pot": "该赛季奖池的 10%",
+  ". Anyone can compete. Your circuit decides, for each withdrawal, ALLOW / THROTTLE / HALT from two numbers: how much of the pool already left today (A) and how big this withdrawal is (B), each in 1/256ths of the pool.": "。任何人都可以参与竞争。你的电路根据两个数字为每次取款给出 ALLOW / THROTTLE / HALT：今天已经离开资金池的比例（A）和本次取款的大小（B），单位都是资金池的 1/256。",
+  "1. Build it": "1. 搭建",
+  ": on the": "：在",
+  "TapeOut canvas": "TapeOut 画布",
+  ", with 16 inputs (A = pins 0–7, B = pins 8–15) and 2 outputs (verdict = pin0 + 2 × pin1).": "上搭建，16 个输入（A = 引脚 0–7，B = 引脚 8–15），2 个输出（裁决 = pin0 + 2 × pin1）。",
+  "2. Stay inside the safety envelope": "2. 不越出安全包络",
+  ": small exits (A+B ≤ 12) always ALLOW; exits up to ~15% (A+B ≤ 38) never HALT; above ~25% (A+B > 64) never ALLOW; and a bigger exit never gets a softer verdict.": "：小额离场（A+B ≤ 12）必须 ALLOW；约 15% 以内（A+B ≤ 38）不得 HALT；超过约 25%（A+B > 64）不得 ALLOW；而且更大的离场绝不能得到更宽松的裁决。",
+  "3. Tape it out on the Stego processor": "3. 在 Stego 处理器上流片",
+  ". That burns 1 STEGO per gate, so smaller designs are cheaper.": "。每个门烧掉 1 枚 STEGO，所以设计越精简越便宜。",
+  "4. Check it": "4. 检验",
+  "proves all 65,536 inputs. Seasons also refuse unsafe rules on-chain.": "会证明全部 65,536 种输入。赛季合约也会在链上拒绝不安全的规则。",
+  "5. Submit": "5. 提交",
+  ": post your circuit ID publicly and tag the project. The curator picks the next season's rule from the passing designs.": "：公开发布你的电路编号并标记本项目。管理者会从通过检验的设计里选出下一季的规则。",
+  "Why it matters": "为什么值得做",
+  ": players' money follows your logic, which can never be edited after tape-out, and your circuit NFT collects the reward automatically.": "：玩家的资金按你的逻辑运转，流片后永远无法修改，奖励自动打入你的电路 NFT。",
+  "FAQ in plain language": "通俗版常见问题",
+  "No jargon needed. Start at the top.": "不需要任何术语，从第一条开始看。",
+  "What is Stego, in one sentence?": "一句话说清 Stego 是什么？",
+  "Stego is a savings pool (a \"vault\") whose safety rules are small, permanent electronic circuits that live on a public blockchain, so nobody can quietly change the rules and anyone can check them.": "Stego 是一个储蓄池（「金库」），它的安全规则是存放在公链上的小型永久电路，所以没人能偷偷改规则，任何人都能核查。",
+  "What problem does it solve?": "它解决什么问题？",
+  "When you put money in most crypto pools, a team controls the rules and can change them. In a panic, everyone rushes for the exit at once (a \"bank run\") and the last people out lose the most.": "你把钱放进大多数加密资金池时，规则由团队掌控，随时可以更改。一旦恐慌，所有人同时涌向出口（「挤兑」），最后离开的人损失最大。",
+  "Stego writes its rules, such as \"no more than about 25% of the pool can leave in one day\", into circuits that": "Stego 把规则（比如「资金池每天最多约 25% 可以离开」）写进电路，而这些电路",
+  "cannot be edited": "无法修改",
+  ". The pool must ask the circuit before every deposit and withdrawal and obey its answer.": "。资金池每次存取款前都必须询问电路，并服从它的答案。",
+  "What are TapeOut, \"transistors\" and \"circuits\"? Is this a real chip factory?": "TapeOut、「晶体管」和「电路」是什么？这是真的芯片厂吗？",
+  "No physical chips are made.": "不制造实体芯片。",
+  "copies the chip-making process on a blockchain:": "在区块链上复刻了芯片制造的过程：",
+  "Transistor": "晶体管",
+  ": a token that stands for one logic gate, like one LEGO brick. Stego's are called STEGO.": "：代表一个逻辑门的代币，就像一块乐高积木。Stego 的晶体管叫 STEGO。",
+  "Circuit": "电路",
+  ": bricks wired together into something that computes an answer, like a small calculator.": "：把积木连起来、能算出答案的东西，就像一个小计算器。",
+  "Tape-out": "流片",
+  ": the moment a design is made permanent. The bricks used are destroyed (\"burned\") and the circuit is stored on-chain forever.": "：让设计永久固化的那一刻。用到的积木被销毁（「烧掉」），电路永久存储在链上。",
+  "Stego's first circuit used 112 transistors, and all 112 were burned when it was taped out. You can check this on the blockchain.": "Stego 的第一个电路用了 112 颗晶体管，流片时全部 112 颗都被烧掉了，这可以在链上查到。",
+  "What do ALLOW, THROTTLE and HALT mean?": "ALLOW、THROTTLE 和 HALT 是什么意思？",
+  ": go ahead, no extra cost.": "：放行，没有额外费用。",
+  ": allowed, but a small 1% fee is charged, and that fee stays in the pool for the people who remain. It discourages panic.": "：允许，但收取 1% 的小额费用，这笔费用留在池子里归剩下的人，用来抑制恐慌。",
+  ": not right now. For withdrawals, this means waiting until the next day's allowance.": "：现在不行。对取款来说，意味着要等到第二天的额度。",
+  "Small withdrawals (under about 4.7% of the pool per day) are guaranteed to always be ALLOWed. That's written into the safety envelope, so no circuit can take it away.": "小额取款（每天约 4.7% 以内）保证永远 ALLOW。这写在安全包络里，任何电路都无法剥夺。",
+  "Why use a circuit instead of normal code?": "为什么用电路而不是普通代码？",
+  "It cannot be changed.": "它无法被修改。",
+  "A taped-out circuit is permanent. To change a rule, a new circuit must be proposed publicly and wait 24 hours, so users can leave first if they disagree.": "流片后的电路是永久的。要改规则，必须公开提议一个新电路并等待 24 小时，不同意的用户可以先离开。",
+  "It can be checked completely.": "它可以被完整检验。",
+  "Each circuit has only 65,536 possible inputs, and we have checked every one of them. This page lets you check it yourself.": "每个电路只有 65,536 种可能的输入，我们逐一检查过，本页也让你亲自检验。",
+  "Strangers can safely contribute rules.": "陌生人也能安全地贡献规则。",
+  "A circuit can only compute an answer. It cannot move money or call other programs, so running a stranger's circuit is safe.": "电路只能算出答案，不能转移资金，也不能调用其他程序，所以运行陌生人的电路是安全的。",
+  "Honest trade-off: a circuit costs more computing (\"gas\") than normal code. On X Layer, that is still far less than a cent per check.": "坦白说代价：电路比普通代码消耗更多计算（「gas」）。在 X Layer 上，每次检查仍然远低于一分钱。",
+  "Who writes the rules, and what stops a bad rule?": "规则由谁写？怎么防止坏规则？",
+  "Anyone can design a rule circuit. Each rule type has a": "任何人都可以设计规则电路。每类规则都有一个",
+  "safety envelope": "安全包络",
+  ", a set of limits every design must respect. For example, small withdrawals must always be allowed, and a bigger withdrawal can never get a softer answer than a smaller one.": "，也就是所有设计都必须遵守的限制。例如：小额取款必须始终放行；更大的取款绝不能得到比小额更宽松的答案。",
+  "To submit a design, the author must lock up 2,000 STEGO as a": "提交设计时，作者必须锁定 2,000 枚 STEGO 作为",
+  "bond": "押金",
+  "(a deposit). If anyone finds a single input where the circuit breaks the envelope, that person takes the whole bond. That's called \"slashing\". So authors are paid to be careful, and checkers are paid to look for mistakes.": "。只要有人找到一个违反包络的输入，就能拿走全部押金，这叫「罚没」。于是作者有动力小心设计，检查者有动力找错。",
+  "A curator also has to approve a design before it goes live, and there is a 24-hour wait before any change takes effect.": "设计上线前还需要管理者批准，任何变更都要等 24 小时才生效。",
+  "How does anyone earn money?": "大家怎么赚钱？",
+  "Policy authors": "规则作者",
+  "earn a 0.1% fee on deposits into the vault, plus 25% of STEGO mint proceeds (the creator's public commitment).": "赚取金库存款的 0.1% 手续费，外加 STEGO 铸造收入的 25%（创建者的公开承诺）。",
+  "Checkers": "检查者",
+  "earn the bond of any circuit they prove wrong.": "证明某个电路有错，就能拿走它的押金。",
+  "People who stay in the pool": "留在池子里的人",
+  "keep the 1% THROTTLE fees paid by people rushing out.": "获得抢着离开的人支付的 1% THROTTLE 手续费。",
+  "Honest note: none of these produce meaningful income until the vault holds real deposits, and the vault earns no yield yet (that's on the roadmap).": "坦白说：在金库有真实存款之前，这些收入都微不足道；而且金库目前还没有收益来源（已列入路线图）。",
+  "How do I use the vault?": "怎么使用金库？",
+  "Connect your wallet, type an amount and press Deposit. Your wallet asks you three times: to \"wrap\" OKB into WOKB (the token form apps use), to approve the vault, and to deposit. To leave, type an amount and press Withdraw. The page tells you in advance whether the circuit says ALLOW (free), THROTTLE (1% fee that stays with the others) or HALT (come back tomorrow).": "连接钱包，输入金额，点「存款」。钱包会请你确认三次：把 OKB「包装」成 WOKB（应用使用的代币形式）、授权金库、存入。离开时输入金额点「取款」。页面会提前告诉你电路的裁决：ALLOW（免费）、THROTTLE（1% 手续费留给其他人）或 HALT（明天再来）。",
+  "If you are the only depositor, you can only take out about a quarter of the vault per day. That's the same rule for everyone, and it's what protects people from a bank run.": "如果你是唯一的存款人，每天只能取出金库的约四分之一。规则对所有人都一样，这正是防止挤兑的机制。",
+  "How does the Nerve game work, and can I lose money?": "Nerve 游戏怎么玩？会亏钱吗？",
+  "You deposit 0.01–0.05 OKB. If you": "你存入 0.01–0.05 OKB。如果你",
+  "stay until the season ends": "坚持到赛季结束",
+  ", you get your full deposit back": "，就能拿回全部本金，",
+  "plus": "再加上",
+  "a share of the pot. Shares are weighted by amount × time, so the earlier you join, the bigger your share. Before you join, the page shows exactly what you'd get if everyone stays. If you": "一份奖池。份额按「金额 × 时间」加权，越早加入份额越大。加入前页面会准确显示：如果大家都坚持，你能拿到多少。如果你",
+  "leave early": "提前离场",
+  ", you pay a fee into the pot: 2% on a calm day, 10% during a rush. If too many people leave on the same day (about a quarter of the pool), the circuit says HALT and you wait until tomorrow.": "，就要向奖池付费：平静时 2%，挤兑时 10%。如果同一天离开的人太多（约奖池的四分之一），电路会给出 HALT，你要等到明天。",
+  "What you can lose: the one-time ticket (about 0.0013 OKB, which buys and burns 10 STEGO) and any fee you pay by leaving early. Nobody, including the creator, can take the deposits. The contract has no admin at all.": "可能的损失：一次性门票（约 0.0013 OKB，用来购买并销毁 10 枚 STEGO），以及提前离场支付的费用。没有人（包括创建者）能拿走存款，合约完全没有管理员。",
+  "Winning pot shares depend on other people leaving early, so the pot may be small if everyone holds.": "奖池收益取决于其他人是否提前离场，如果大家都坚持，奖池可能不大。",
+  "What is STEGO Boost?": "什么是 STEGO 加成？",
+  "While joining is open, you can burn STEGO to make your pot share bigger: +5% for every 10 STEGO, up to +50% (100 STEGO, about 0.0073 OKB). The page tells you whether a boost is worth it at the current pot size before you buy. Burned STEGO is gone forever, so it makes the rest scarcer.": "在开放加入期间，你可以销毁 STEGO 来扩大奖池份额：每 10 枚 +5%，最高 +50%（100 枚，约 0.0073 OKB）。购买前页面会告诉你，以当前奖池规模加成是否划算。销毁的 STEGO 永久消失，剩下的会更稀缺。",
+  "Can I design a season's rule and get paid?": "我可以设计赛季规则并获得报酬吗？",
+  "Yes. See \"Design the next season's exit rule\" above. If your circuit is chosen, you receive 10% of that season's pot, paid automatically to whoever owns the circuit NFT.": "可以。见上方「设计下一季的离场规则」。如果你的电路被选中，你会获得该赛季奖池的 10%，自动支付给电路 NFT 的持有者。",
+  "What is live today, and what is not?": "现在哪些已上线，哪些还没有？",
+  "Live on X Layer:": "已在 X Layer 上线：",
+  "the Stego processor, all three rule circuits, the rule registry, the vault and Nerve Season 1. Everything on this page is read directly from the blockchain.": "Stego 处理器、全部三个规则电路、规则注册表、金库，以及 Nerve 第一季。本页所有内容都直接读取自区块链。",
+  "Coming next:": "即将推出：",
+  "recurring funded seasons, and real yield for the vault (it holds no strategy yet).": "持续有资金支持的赛季，以及为金库接入真实收益（目前还没有收益策略）。",
+  "What are the risks?": "有哪些风险？",
+  "The code has not been professionally audited. Deposits will start capped at 5 OKB in total.": "代码尚未经过专业审计。存款总额初期上限为 5 OKB。",
+  "TapeOut can upgrade its own platform code. If that happens, Stego automatically stops trusting the circuits and freezes penalties until the upgrade is reviewed. Withdrawals always stay possible.": "TapeOut 可以升级自己的平台代码。一旦发生，Stego 会自动停止信任电路并冻结罚没，直到升级被审核完毕。取款始终可以进行。",
+  "The daily withdrawal limit means a very large exit may have to wait until the next day.": "由于每日取款限额，非常大额的离场可能要等到第二天。",
+  "Glossary": "术语表",
+  ": OKX's blockchain network. Fees are tiny fractions of a cent.": "：OKX 的区块链网络，手续费不到一分钱的零头。",
+  ": X Layer's currency, and its \"wrapped\" token form used by apps.": "：X Layer 的原生币，以及应用使用的「包装」代币形式。",
+  "Vault": "金库",
+  ": a shared pool of funds that follows fixed rules.": "：按固定规则运作的共享资金池。",
+  ": total value locked, the size of the pool.": "：锁仓总价值，也就是资金池的规模。",
+  "Epoch": "周期",
+  ": one day. Withdrawal allowances reset each epoch.": "：一天。取款额度每个周期重置。",
+  "Drawdown": "回撤",
+  ": how far the pool's value has fallen from its highest point.": "：资金池价值从最高点下跌了多少。",
+  ": asking a circuit for its answer. Free to read, and anyone can do it.": "：向电路询问答案，免费读取，任何人都可以做。",
+  "Bond / slashing": "押金 / 罚没",
+  ": a deposit an author locks up, lost to whoever proves their circuit wrong.": "：作者锁定的押金，谁证明电路有错就归谁。",
+  "Curator": "管理者",
+  ": the account that approves which designs go live. Changes still wait 24 hours.": "：负责批准哪些设计上线的账户，变更仍需等待 24 小时。",
+  ": the on-chain \"factory line\" that holds Stego's circuits, created through TapeOut.": "：存放 Stego 电路的链上「生产线」，通过 TapeOut 创建。",
+  "On-chain facts": "链上事实",
+  "Factory check": "工厂校验",
+  "isCPU = true (created through the TapeOut factory)": "isCPU = true（通过 TapeOut 工厂创建）",
+  "Transistors (ERC-1155)": "晶体管（ERC-1155）",
+  "Deployment wallet": "部署钱包",
+  "Supply cap / price": "供应上限 / 价格",
+  "Circuit #1 netlist": "电路 #1 网表",
+  "Stego · built on": "Stego · 基于",
+  "× X Layer for the Ignix Genesis Transistor Hackathon. Unaudited hackathon build. All data is read directly from X Layer RPC; no backend.": "× X Layer 构建，参加 Ignix Genesis Transistor 黑客松。黑客松版本，未经审计。所有数据直接读取自 X Layer 节点，没有后端。",
+  "Source code on GitHub": "GitHub 源代码",
+  "No wallet found. Install OKX Wallet or MetaMask, then reload.": "未找到钱包。请安装 OKX 钱包或 MetaMask 后刷新页面。",
+  "Wallet connection was cancelled or failed.": "钱包连接被取消或失败。",
+  "Your wallet doesn't have enough OKB for this amount plus gas.": "你的钱包 OKB 不足以支付该金额和 gas。",
+  "You cancelled it in your wallet.": "你在钱包里取消了操作。",
+  "Switch your wallet to X Layer (chain 196).": "请把钱包切换到 X Layer（链 ID 196）。",
+  "Joining is closed for this season.": "本赛季已停止加入。",
+  "The season has ended. Use Claim instead.": "赛季已结束，请使用「领取」。",
+  "The season has not ended yet.": "赛季尚未结束。",
+  "Deposit too small. The minimum is 0.01 OKB after the ticket.": "存款太少。扣除门票后最少 0.01 OKB。",
+  "That would put you over the 0.05 OKB per-wallet limit.": "这会超出每个钱包 0.05 OKB 的上限。",
+  "The season is full.": "本赛季名额已满。",
+  "Enter an amount between 0 and your deposit.": "请输入 0 到你的存款之间的金额。",
+  "HALT: today's exit allowance is used up. Try a smaller amount or come back tomorrow.": "HALT：今天的离场额度已用完，请减少金额或明天再来。",
+  "Nothing to claim for this wallet.": "这个钱包没有可领取的资产。",
+  "Join the season first, then boost.": "请先加入赛季，再使用加成。",
+  "That would take you above the +50% boost limit.": "这会超过 +50% 的加成上限。",
+  "The boost price changed; refresh and try again.": "加成价格有变化，请刷新后重试。",
+  "HALT: that is more than today's withdrawal allowance. Try a smaller amount or come back tomorrow.": "HALT：超过了今天的取款额度，请减少金额或明天再来。",
+  "Deposits are paused by the drawdown circuit (the vault is more than ~10% below its high).": "回撤电路已暂停存款（金库价值比最高点低约 10% 以上）。",
+  "That is more than the vault accepts right now (cap reached or deposits paused).": "金额超过金库当前可接受的范围（已达上限或存款暂停）。",
+  "That is more than you can withdraw today. Use the 'Max out today' amount.": "超过了你今天可取的金额，请使用「今日最多可取」的数额。",
+  "Not enough balance for that amount.": "余额不足。",
+  "The approval step did not complete. Try again.": "授权步骤未完成，请重试。",
+  "view": "查看",
+  "view on OKLink": "在 OKLink 查看",
+};
+
+const ZH_ACTION = { Join: "加入", Leave: "离场", Claim: "领取", "Add to pot": "注资奖池", Boost: "加成", Deposit: "存款", Withdraw: "取款" };
+const ZH_STEP = { "wrap OKB": "包装 OKB", approve: "授权", deposit: "存入", withdraw: "取出", "unwrap to OKB": "解包为 OKB" };
+const zhErr = (m) => ZH[m] || m;
+const ZH_PATTERNS = [
+  [/^X Layer mainnet · block (.+)$/, (m) => `X Layer 主网 · 区块 ${m[1]}`],
+  [/^X Layer node busy, retrying \((\d+)\/4\)…$/, (m) => `X Layer 节点繁忙，正在重试（${m[1]}/4）…`],
+  [/^of (.+) cap · (.+) OKB each$/, (m) => `上限 ${m[1]} · 每颗 ${m[2]} OKB`],
+  [/^(\d+) of 3 rules live$/, (m) => `${m[1]} / 3 条规则生效`],
+  [/^Players in = still holding \/ ever joined\. Today's exits = share of the pool that left today; around 10% is calm, above 25% the circuit HALTs\. (.+) STEGO burned as tickets, (.+) as boosts\. Exit rule: circuit #(\d+) designed by$/,
+    (m) => `参与人数 = 仍在场 / 曾加入。今日离场 = 今天离开资金池的比例；约 10% 算平静，超过 25% 电路就会 HALT。门票已销毁 ${m[1]} 枚 STEGO，加成已销毁 ${m[2]} 枚。离场规则：电路 #${m[3]}，设计者`],
+  [/^Players in = still holding \/ ever joined\. Today's exits = share of the pool that left today; around 10% is calm, above 25% the circuit HALTs\. (.+) STEGO burned as tickets, (.+) as boosts\. Exit rule: circuit #(\d+)\. Contract:$/,
+    (m) => `参与人数 = 仍在场 / 曾加入。今日离场 = 今天离开资金池的比例；约 10% 算平静，超过 25% 电路就会 HALT。门票已销毁 ${m[1]} 枚 STEGO，加成已销毁 ${m[2]} 枚。离场规则：电路 #${m[3]}。合约：`],
+  [/^circuit #(\d+) · author$/, (m) => `电路 #${m[1]} · 作者`],
+  [/^· bond (.+) STEGO · unclaimed rewards (.+) WOKB(.*)$/, (m) => `· 押金 ${m[1]} STEGO · 未领取奖励 ${m[2]} WOKB${m[3].replace(/ · pending #(\d+) \(can go live (.+)\)/, " · 待生效 #$1（可于 $2 生效）")}`],
+  [/^empty · pending #(\d+) \(can go live (.+)\)$/, (m) => `空 · 待生效 #${m[1]}（可于 ${m[2]} 生效）`],
+  [/^(\d+) \/ 256 ≈ (.+)% of TVL$/, (m) => `${m[1]} / 256 ≈ TVL 的 ${m[2]}%`],
+  [/^(\d+) \/ (\d+) on-chain evals · (\d+) mismatches$/, (m) => `链上求值 ${m[1]} / ${m[2]} 次 · 不一致 ${m[3]} 次`],
+  [/^(\d+) \/ (\d+) correct and inside the safety envelope\.$/, (m) => `${m[1]} / ${m[2]} 次正确，且都在安全包络内。`],
+  [/^(\d+) mismatches found in (\d+) evals$/, (m) => `${m[2]} 次求值中发现 ${m[1]} 次不一致`],
+  [/^This session: (.+) live evals across (\d+) runs?\. Exhaustive off-chain proof: 65,536 \/ 65,536\.$/, (m) => `本次会话：${m[2]} 轮共 ${m[1]} 次链上求值。链下穷举证明：65,536 / 65,536。`],
+  [/^(.+) STEGO · (.+) OKB \(immutable\)$/, (m) => `${m[1]} STEGO · ${m[2]} OKB（不可更改）`],
+  [/^(\d+) bytes · keccak (.+)$/, (m) => `${m[1]} 字节 · keccak ${m[2]}`],
+  [/^On-chain story: ([\s\S]*)$/, (m) => `链上故事（原文）：${m[1]}`],
+  [/^First join adds the ticket: (.+) OKB \(10 STEGO minted and burned\)\.$/, (m) => `首次加入需要门票：${m[1]} OKB（铸造并销毁 10 枚 STEGO）。`],
+  [/^If everyone stays to the end: you get back (.+) OKB \+ (.+) OKB from the pot, minus the (.+) OKB ticket =$/, (m) => `如果大家都坚持到最后：你拿回 ${m[1]} OKB + 奖池 ${m[2]} OKB，扣除 ${m[3]} OKB 门票 =`],
+  [/^If everyone stays to the end: you get back (.+) OKB \+ (.+) OKB from the pot =$/, (m) => `如果大家都坚持到最后：你拿回 ${m[1]} OKB + 奖池 ${m[2]} OKB =`],
+  [/^: today's exit allowance is used up\. The most you can take today is (.+) OKB\.$/, (m) => `：今天的离场额度已用完，今天最多还能取 ${m[1]} OKB。`],
+  [/^: today's exit allowance is used up\.$/, () => "：今天的离场额度已用完。"],
+  [/^: fee (.+) OKB goes to the stayers' pot, and you receive (.+) OKB\. \(Circuit input A=(\d+), B=(\d+)\)$/, (m) => `：${m[1]} OKB 手续费进入坚持者奖池，你实际收到 ${m[2]} OKB。（电路输入 A=${m[3]}，B=${m[4]}）`],
+  [/^Costs (.+) OKB \((\d+) STEGO minted and burned\)\. If everyone stays, it adds about (.+) OKB to your pot share:$/, (m) => `费用 ${m[1]} OKB（铸造并销毁 ${m[2]} 枚 STEGO）。如果大家都坚持，你的奖池份额约增加 ${m[3]} OKB：`],
+  [/^\+(\d+)% \((\d+) STEGO\)$/, (m) => `+${m[1]}%（${m[2]} 枚 STEGO）`],
+  [/^Connected: (.+)$/, (m) => `已连接：${m[1]}`],
+  [/^: over today's allowance\. See "Max out today"\. \(Circuit input A=(\d+), B=(\d+)\)$/, (m) => `：超过今日额度，请看「今日最多可取」。（电路输入 A=${m[1]}，B=${m[2]}）`],
+  [/^: you receive (.+) OKB and pay a (.+)% fee in shares, which stays with the remaining depositors\. \(A=(\d+), B=(\d+)\)$/, (m) => `：你收到 ${m[1]} OKB，并以份额支付 ${m[2]}% 手续费，费用留给其余存款人。（A=${m[3]}，B=${m[4]}）`],
+  [/^: you receive (.+) OKB, no fee\. \(A=(\d+), B=(\d+)\)$/, (m) => `：你收到 ${m[1]} OKB，无手续费。（A=${m[2]}，B=${m[3]}）`],
+  [/^(Join|Leave|Claim|Add to pot|Boost): confirm in your wallet…$/, (m) => `${ZH_ACTION[m[1]]}：请在钱包中确认…`],
+  [/^(Join|Leave|Claim|Add to pot|Boost): sent, waiting…$/, (m) => `${ZH_ACTION[m[1]]}：已发送，等待确认…`],
+  [/^(Join|Leave|Claim|Add to pot|Boost|Deposit|Withdraw): done ✓$/, (m) => `${ZH_ACTION[m[1]]}：完成 ✓`],
+  [/^(Join|Leave|Claim|Add to pot|Boost|Deposit|Withdraw) failed: ([\s\S]+)$/, (m) => `${ZH_ACTION[m[1]]}失败：${zhErr(m[2])}`],
+  [/^(Deposit|Withdraw) step (\d)\/(\d) \((.+)\): confirm in your wallet…$/, (m) => `${ZH_ACTION[m[1]]} 第 ${m[2]}/${m[3]} 步（${ZH_STEP[m[4]] || m[4]}）：请在钱包中确认…`],
+  [/^(Deposit|Withdraw) step (\d)\/(\d) \((.+)\): waiting…$/, (m) => `${ZH_ACTION[m[1]]} 第 ${m[2]}/${m[3]} 步（${ZH_STEP[m[4]] || m[4]}）：等待确认…`],
+  [/^(\d+)d (\d+)h$/, (m) => `${m[1]} 天 ${m[2]} 小时`],
+  [/^(\d+)h (\d+)m$/, (m) => `${m[1]} 小时 ${m[2]} 分`],
+  [/^(\d+)m$/, (m) => `${m[1]} 分钟`],
+];
+
+let LANG = "en";
+const zhOf = (text) => {
+  const key = text.trim().replace(/\s+/g, " ");
+  if (!key || !/[A-Za-z]/.test(key)) return null;
+  if (ZH[key] !== undefined) return ZH[key];
+  for (const [re, fn] of ZH_PATTERNS) { const m = key.match(re); if (m) return fn(m); }
+  return null;
+};
+const i18nOrig = new WeakMap(); // text node -> { en, shown }
+let i18nBusy = false;
+function i18nApply(root) {
+  i18nBusy = true;
+  const walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.parentElement && !["SCRIPT", "STYLE", "TEXTAREA"].includes(n.parentElement.tagName) ? 1 : 2),
+  });
+  let n;
+  while ((n = walker.nextNode())) {
+    const rec = i18nOrig.get(n);
+    const en = rec && n.nodeValue === rec.shown ? rec.en : n.nodeValue;
+    let shown = en;
+    if (LANG === "zh") {
+      const zh = zhOf(en);
+      if (zh !== null) shown = (en.match(/^\s*/)[0]) + zh + (en.match(/\s*$/)[0]);
+    }
+    if (n.nodeValue !== shown) n.nodeValue = shown;
+    i18nOrig.set(n, { en, shown });
+  }
+  i18nBusy = false;
+}
+const i18nObserver = new MutationObserver((muts) => {
+  if (i18nBusy || LANG === "en") return;
+  for (const m of muts) {
+    if (m.type === "characterData") i18nApply(m.target.parentElement || document.body);
+    else if (m.target.nodeType === 1) i18nApply(m.target);
+  }
+});
+function setLang(lang, save) {
+  LANG = lang === "zh" ? "zh" : "en";
+  document.documentElement.lang = LANG === "zh" ? "zh-CN" : "en";
+  document.getElementById("langEn").classList.toggle("on", LANG === "en");
+  document.getElementById("langZh").classList.toggle("on", LANG === "zh");
+  if (save) { try { localStorage.setItem("stego-lang", LANG); } catch (_) {} }
+  i18nApply(document.body);
+}
+(function initLang() {
+  let saved = null;
+  try { saved = localStorage.getItem("stego-lang"); } catch (_) {}
+  const guess = saved || ((navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en");
+  document.getElementById("langEn").onclick = () => setLang("en", true);
+  document.getElementById("langZh").onclick = () => setLang("zh", true);
+  i18nObserver.observe(document.body, { subtree: true, childList: true, characterData: true });
+  setLang(guess, false);
+})();
+</script>
+<script>
 const CFG = {
   rpcs: ["https://xlayerrpc.okx.com", "https://rpc.xlayer.tech"],
   factory: "0x1f09DAeFA827f02CBb40967cc91b259763760761",
@@ -567,18 +993,23 @@ const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValu
 
 // ---------------------------------------------------------------- theme
 (function theme() {
-  let saved = null;
-  try { saved = localStorage.getItem("stego-theme"); } catch (_) {}
-  if (saved) document.documentElement.dataset.theme = saved;
-  $("themeBtn").onclick = () => {
+  const apply = (mode, save) => {
+    if (mode) document.documentElement.dataset.theme = mode;
     const dark = document.documentElement.dataset.theme
       ? document.documentElement.dataset.theme === "dark"
       : matchMedia("(prefers-color-scheme: dark)").matches;
-    const next = dark ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try { localStorage.setItem("stego-theme", next); } catch (_) {}
-    drawMap(); drawDie();
+    $("themeLight").classList.toggle("on", !dark);
+    $("themeDark").classList.toggle("on", dark);
+    if (save) {
+      try { localStorage.setItem("stego-theme", mode); } catch (_) {}
+      drawMap(); drawDie(); // only on a user click; at start-up the charts don't exist yet
+    }
   };
+  let saved = null;
+  try { saved = localStorage.getItem("stego-theme"); } catch (_) {}
+  apply(saved, false);
+  $("themeLight").onclick = () => apply("light", true);
+  $("themeDark").onclick = () => apply("dark", true);
 })();
 
 // ---------------------------------------------------------------- chain
