@@ -1,0 +1,22 @@
+# build output and downloaded dependencies
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+circuits/node_modules/
+
+# secrets (never commit)
+.env
+.env.*
+*.key
+*.pem
+keystore*
+
+# local tooling and internal notes
+.claude/
+HANDOFF.md
+XLAYER_TAPEOUT_RESEARCH_AND_PLAN.md
+
+# third-party documents (not ours to redistribute)
+TapeOut-Protocol.pdf
+rule.md

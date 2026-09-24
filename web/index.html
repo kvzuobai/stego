@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stego Vaults</title>
+<meta name="description" content="Circuit-governed vaults on TapeOut × X Layer: risk rules as NAND circuits, enforced on-chain.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f6f7f4;
+  --surface: #ffffff;
+  --surface-2: #eef0ea;
+  --ink: #15191a;
+  --ink-2: #4a5254;
+  --ink-3: #7b8486;
+  --line: #dde1d9;
+  --accent: #1f7a5a;
+  --accent-ink: #ffffff;
+  --allow: #1f7a5a;
+  --throttle: #b7791f;
+  --halt: #b83a3a;
+  --gate-off: #e3e6df;
+  --gate-on: #1f7a5a;
+  --shadow: 0 1px 2px rgba(20, 30, 25, .06), 0 4px 16px rgba(20, 30, 25, .05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1112;
+    --surface: #161a1b;
+    --surface-2: #1d2223;
+    --ink: #e8ecea;
+    --ink-2: #b3bbb8;
+    --ink-3: #7f8986;
+    --line: #2a3032;
+    --accent: #3fbf8f;
+    --accent-ink: #06130e;
+    --allow: #3fbf8f;
+    --throttle: #e0a53d;
+    --halt: #e2615f;
+    --gate-off: #232a2b;
+    --gate-on: #3fbf8f;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1112;
+  --surface: #161a1b;
+  --surface-2: #1d2223;
+  --ink: #e8ecea;
+  --ink-2: #b3bbb8;
+  --ink-3: #7f8986;
+  --line: #2a3032;
+  --accent: #3fbf8f;
+  --accent-ink: #06130e;
+  --allow: #3fbf8f;
+  --throttle: #e0a53d;
+  --halt: #e2615f;
+  --gate-off: #232a2b;
+  --gate-on: #3fbf8f;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+
+header.top { border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; }
+.brand svg { width: 26px; height: 26px; }
+.live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+.dot.ok { background: var(--allow); box-shadow: 0 0 0 3px color-mix(in srgb, var(--allow) 25%, transparent); }
+.dot.err { background: var(--halt); }
+.theme-btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 8px; padding: 5px 9px; cursor: pointer; font: inherit; font-size: 13px; }
+
+.hero { padding: 44px 0 28px; }
+.hero h1 { font-size: clamp(28px, 4.2vw, 44px); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 14px; max-width: 820px; }
+.hero p { color: var(--ink-2); font-size: 17px; max-width: 760px; margin: 0; }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 28px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
+.tile .k { font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }
+.tile .v { font-size: 24px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 12.5px; color: var(--ink-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+section { padding: 18px 0; }
+h2 { font-size: 20px; letter-spacing: -.01em; margin: 0 0 4px; }
+.sub { color: var(--ink-2); margin: 0 0 16px; max-width: 780px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 20px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+.grid2 > * { min-width: 0; }
+
+.ctrl { margin-bottom: 18px; }
+.ctrl label { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--ink-2); margin-bottom: 6px; gap: 8px; }
+.ctrl label b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.verdict { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 12px; background: var(--surface-2); margin: 6px 0 16px; }
+.badge { font-weight: 700; letter-spacing: .04em; font-size: 20px; padding: 6px 14px; border-radius: 10px; color: #fff; background: var(--ink-3); }
+.badge.v0 { background: var(--allow); color: var(--accent-ink); }
+.badge.v1 { background: var(--throttle); color: #1b1305; }
+.badge.v2 { background: var(--halt); color: #fff; }
+.verdict .why { color: var(--ink-2); font-size: 14px; }
+.pins { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 4px 0 10px; }
+.pin { width: 22px; height: 22px; border-radius: 5px; background: var(--gate-off); color: var(--ink-3); font: 600 10px/22px "JetBrains Mono", monospace; text-align: center; }
+.pin.on { background: var(--gate-on); color: var(--accent-ink); }
+.pins .lbl { font-size: 12px; color: var(--ink-3); width: 100%; margin-top: 4px; }
+.pins .sep { width: 10px; }
+.proof { font-size: 13px; color: var(--ink-2); border-top: 1px dashed var(--line); padding-top: 12px; display: grid; gap: 4px; }
+.proof .row { display: flex; justify-content: space-between; gap: 10px; }
+.ok-t { color: var(--allow); font-weight: 600; }
+.bad-t { color: var(--halt); font-weight: 600; }
+
+canvas { display: block; width: 100%; image-rendering: pixelated; border-radius: 10px; background: var(--surface-2); }
+.canvas-cap { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+.btn { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 10px 16px; font: 600 14px Inter, sans-serif; cursor: pointer; }
+.btn:disabled { opacity: .55; cursor: default; }
+.bar { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin: 14px 0 8px; }
+.bar > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.stats-line { font-size: 14px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+table.facts { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.facts td { padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.facts td:first-child { color: var(--ink-3); width: 190px; padding-right: 12px; }
+table.facts td:last-child { word-break: break-all; }
+.story { font-size: 13.5px; color: var(--ink-2); background: var(--surface-2); border-radius: 10px; padding: 12px 14px; margin-top: 14px; }
+
+.pipeline { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.step { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--surface); min-width: 0; }
+.step .st { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.step .st.live { color: var(--allow); }
+.step .st.ready { color: var(--throttle); }
+.step h3 { margin: 6px 0 4px; font-size: 15px; }
+.step p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+
+.faq details { border-bottom: 1px solid var(--line); padding: 4px 0; }
+.faq summary { cursor: pointer; list-style: none; padding: 12px 28px 12px 0; font-weight: 600; position: relative; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 4px; top: 10px; font-size: 20px; color: var(--ink-3); font-weight: 400; }
+.faq details[open] summary::after { content: "\2013"; }
+.faq .ans { color: var(--ink-2); padding: 0 0 14px; max-width: 780px; }
+.faq .ans p { margin: 0 0 10px; }
+.faq .ans ul { margin: 0 0 10px; padding-left: 20px; }
+.glossary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 24px; margin-top: 8px; }
+.glossary div { font-size: 14px; color: var(--ink-2); min-width: 0; }
+.glossary b { color: var(--ink); }
+.hero .cta { margin-top: 16px; font-size: 14.5px; }
+.kv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0 6px; }
+.kv > div { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.kv .k { font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }
+.kv .v { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+@media (max-width: 860px) { .glossary, .kv { grid-template-columns: 1fr; } }
+.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pill { font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--ink-2); border-radius: 99px; padding: 3px 10px; margin-left: 6px; vertical-align: 2px; }
+.act { margin-top: 14px; }
+.act label { font-size: 13.5px; color: var(--ink-2); display: block; margin-bottom: 6px; }
+.row2 { display: flex; gap: 8px; }
+.row2 select { flex: 1; min-width: 0; font: 14px Inter, sans-serif; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.row2 input { flex: 1; min-width: 0; font: 15px "JetBrains Mono", monospace; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.hint { font-size: 13px; color: var(--ink-3); margin-top: 6px; min-height: 1em; }
+.btn.ghost { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+@media (max-width: 860px) { .steps3 { grid-template-columns: 1fr; } }
+footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
+.err-box { display: none; color: var(--halt); font-size: 13.5px; margin-top: 10px; }
+
+@media (max-width: 860px) {
+  .tiles { grid-template-columns: repeat(2, 1fr); }
+  .grid2, .pipeline { grid-template-columns: 1fr; }
+  table.facts td:first-child { width: 120px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="26" height="26" rx="6" fill="var(--accent)"/><path d="M9 20l5-9 4 6 5-8" stroke="var(--accent-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Stego
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <span class="live"><span class="dot" id="netDot"></span><span id="netTxt">Connecting to X Layer…</span></span>
+      <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>Vault risk rules, etched into silicon on X Layer.</h1>
+    <p>Stego vaults obey NAND circuits taped out on TapeOut. Every withdrawal, deposit and rebalance asks a circuit for a verdict through <span class="mono">eval()</span>. Every circuit is proven correct over all 65,536 inputs. Everything on this page is read live from X Layer mainnet.</p>
+    <p class="cta"><a href="#nerve"><b>Play Nerve, the bank-run game →</b></a> &nbsp;·&nbsp; New to this? <a href="#faq">Read the plain-language FAQ</a>. No crypto or chip knowledge needed.</p>
+    <div class="tiles">
+      <div class="tile"><div class="k">Processor</div><div class="v" id="tProc">…</div><div class="s mono" id="tProcAddr">&nbsp;</div></div>
+      <div class="tile"><div class="k">Circuits taped out</div><div class="v" id="tCirc">…</div><div class="s" id="tCircS">&nbsp;</div></div>
+      <div class="tile"><div class="k">Transistors minted</div><div class="v" id="tMinted">…</div><div class="s" id="tCap">&nbsp;</div></div>
+      <div class="tile"><div class="k">Burned into silicon</div><div class="v" id="tBurned">…</div><div class="s">1 transistor per gate</div></div>
+    </div>
+  </div>
+
+  <section id="nerve">
+    <h2><span id="nTitle">Nerve: Season 1</span>, the bank-run game</h2>
+    <p class="sub">Put in a small amount of OKB. Anyone can leave at any time, but <b>the live circuit sets the price of leaving</b>, and every fee goes into a pot. When the season ends, everyone who held their nerve gets their deposit back plus a share of the pot.</p>
+    <div class="steps3">
+      <div class="step"><div class="st live">1 · Join</div><h3>Deposit 0.01–0.05 OKB</h3><p>Joining also mints and burns a 10-STEGO ticket in the same transaction (<span id="nTicket">~0.0013</span> OKB). Top-ups need no new ticket.</p></div>
+      <div class="step"><div class="st ready">2 · Hold or fold</div><h3>Leaving costs you</h3><p>Calm day: 2% into the pot. Rush (THROTTLE): 10%. If today's exit allowance (~25% of the pool) is used up, you wait until tomorrow.</p></div>
+      <div class="step"><div class="st live">3 · Stayers win</div><h3>Split the pot</h3><p>At the end, stayers share the pot by OKB × time committed, so <b>joining early earns more</b>. 10% goes to the designer of the exit-rule circuit.</p></div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin:0 0 10px">Season status <span class="pill" id="nPhase">…</span></h3>
+        <div class="kv">
+          <div><div class="k">Pot</div><div class="v" id="nPot">…</div></div>
+          <div><div class="k">Players in</div><div class="v" id="nPlayers">…</div></div>
+          <div><div class="k">Pool</div><div class="v" id="nPool">…</div></div>
+          <div><div class="k">Today's exits</div><div class="v" id="nToday">…</div></div>
+          <div><div class="k">Join closes</div><div class="v" id="nJoinIn">…</div></div>
+          <div><div class="k">Season ends</div><div class="v" id="nEndIn">…</div></div>
+        </div>
+        <div class="canvas-cap" id="nNote">Loading…</div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 10px">Your seat</h3>
+        <button class="btn" id="nConnect" type="button">Connect wallet</button>
+        <div id="nSeat" style="display:none">
+          <div class="stats-line mono" id="nAddr"></div>
+          <div class="kv" style="grid-template-columns:repeat(2,1fr)">
+            <div><div class="k">Your deposit</div><div class="v" id="nMine">…</div></div>
+            <div><div class="k">If you hold to the end</div><div class="v" id="nProj">…</div></div>
+          </div>
+          <div class="act">
+            <label for="nJoinAmt">Join / top up (OKB)</label>
+            <div class="row2"><input id="nJoinAmt" type="number" min="0.01" max="0.05" step="0.001" value="0.05"><button class="btn" id="nJoinBtn" type="button">Join</button></div>
+            <div class="hint" id="nJoinHint"></div>
+            <div class="hint" id="nJoinQuote"></div>
+          </div>
+          <div class="act">
+            <label for="nExitAmt">Leave (OKB)</label>
+            <div class="row2"><input id="nExitAmt" type="number" min="0" step="0.001" value="0.005"><button class="btn ghost" id="nExitBtn" type="button">Leave</button></div>
+            <div class="hint" id="nQuote">Enter an amount to see what the circuit charges.</div>
+          </div>
+          <div class="act" id="nBoostBox">
+            <label for="nBoostUnits">STEGO Boost: burn STEGO to raise your pot share (+5% per 10 STEGO, up to +50%)</label>
+            <div class="row2"><select id="nBoostUnits"></select><button class="btn ghost" id="nBoostBtn" type="button">Boost</button></div>
+            <div class="hint" id="nBoostQuote"></div>
+          </div>
+          <div class="act" id="nFundBox">
+            <label for="nFundAmt">Add to the pot (anyone can sponsor; this cannot be taken back)</label>
+            <div class="row2"><input id="nFundAmt" type="number" min="0" step="0.001" value="0.01"><button class="btn ghost" id="nFundBtn" type="button">Add to pot</button></div>
+            <div class="hint">Goes to the players still in at the end (10% to the exit-rule designer). If nobody stays, it all goes to the designer.</div>
+          </div>
+          <button class="btn" id="nClaimBtn" type="button" style="display:none">Claim deposit + pot share</button>
+          <div class="hint" id="nTx"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vault">
+    <h2>Stego Vault: savings with circuit-enforced rules</h2>
+    <p class="sub">Deposit OKB and receive vault shares. Every deposit and withdrawal asks the live circuits for a verdict first. Deposits pay a 0.1% fee that goes to the rule designers. Withdrawals are free up to ~10% of the vault per day, cost 1% up to ~25% (the fee stays with the people who remain), and beyond that wait for the next day.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin:0 0 10px">Vault status <span class="pill" id="vPhase">…</span></h3>
+        <div class="kv">
+          <div><div class="k">Total deposited</div><div class="v" id="vTvl">…</div></div>
+          <div><div class="k">Share price</div><div class="v" id="vPrice">…</div></div>
+          <div><div class="k">Room under cap</div><div class="v" id="vRoom">…</div></div>
+          <div><div class="k">Withdrawn today</div><div class="v" id="vToday">…</div></div>
+          <div><div class="k">Deposits</div><div class="v" id="vDep">…</div></div>
+          <div><div class="k">Rules live</div><div class="v" id="vRules">…</div></div>
+        </div>
+        <div class="canvas-cap" id="vNote">Loading…</div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 10px">Your vault position</h3>
+        <button class="btn" id="vConnect" type="button">Connect wallet</button>
+        <div id="vSeat" style="display:none">
+          <div class="kv" style="grid-template-columns:repeat(2,1fr)">
+            <div><div class="k">Your balance</div><div class="v" id="vMine">…</div></div>
+            <div><div class="k">Max out today</div><div class="v" id="vMax">…</div></div>
+          </div>
+          <div class="act">
+            <label for="vDepAmt">Deposit (OKB)</label>
+            <div class="row2"><input id="vDepAmt" type="number" min="0" step="0.001" value="0.01"><button class="btn" id="vDepBtn" type="button">Deposit</button></div>
+            <div class="hint" id="vDepHint">Three wallet steps: wrap OKB → approve → deposit.</div>
+          </div>
+          <div class="act">
+            <label for="vWdAmt">Withdraw (OKB)</label>
+            <div class="row2"><input id="vWdAmt" type="number" min="0" step="0.001" value="0.001"><button class="btn ghost" id="vWdBtn" type="button">Withdraw</button></div>
+            <div class="hint" id="vWdQuote">Enter an amount to see the circuit's verdict.</div>
+          </div>
+          <div class="hint" id="vTx"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin:0 0 6px">Rule slots (PolicyRegistry)</h3>
+      <p class="sub" style="margin-bottom:8px">Each slot holds one circuit. Its author bonded STEGO that anyone can claim by proving the circuit breaks its safety envelope. Changes need curator approval plus a 24-hour wait.</p>
+      <table class="facts"><tbody id="vSlots"><tr><td>Loading…</td><td></td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Live policy: WITHDRAW_GUARD_V1 (circuit #1)</h2>
+    <p class="sub">Move the sliders to set the vault's state. The page evaluates the live circuit on mainnet, and separately re-simulates the netlist bytes it downloaded from the chain, gate by gate. Both must agree.</p>
+    <div class="grid2">
+      <div class="card">
+        <div class="ctrl">
+          <label for="sA"><span>A: already withdrawn this epoch</span><b id="lA"></b></label>
+          <input id="sA" type="range" min="0" max="255" value="10">
+        </div>
+        <div class="ctrl">
+          <label for="sB"><span>B: this withdrawal request</span><b id="lB"></b></label>
+          <input id="sB" type="range" min="0" max="255" value="12">
+        </div>
+        <div class="verdict">
+          <span class="badge" id="badge">…</span>
+          <span class="why" id="why">Evaluating on-chain…</span>
+        </div>
+        <div class="pins" id="pinsIn"></div>
+        <div class="pins" id="pinsOut"></div>
+        <div class="proof">
+          <div class="row"><span>On-chain <span class="mono">eval(1, 0x<span id="inHex">…</span>)</span></span><span class="mono" id="pChain">…</span></div>
+          <div class="row"><span>In-browser simulation of on-chain netlist</span><span class="mono" id="pSim">…</span></div>
+          <div class="row"><span>This design's exact rule</span><span class="mono" id="pSpec">…</span></div>
+          <div class="row"><span>Safety envelope (what any design must obey)</span><span id="pEnv">…</span></div>
+          <div class="row"><span>Agreement</span><span id="pAgree">…</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <canvas id="die" width="256" height="256" aria-label="Die view of the circuit's gates"></canvas>
+        <div class="canvas-cap">Die view: each square is one of the circuit's <span id="gateCount">…</span> NAND gates, lit when its output is 1 for the current input. Taping out burned one STEGO transistor for each of them.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="grid2">
+      <div class="card">
+        <h2>Verdict map</h2>
+        <p class="sub" style="margin-bottom:12px">All 65,536 inputs, computed from the on-chain netlist. X axis = A, Y axis = B. The crosshair is your slider position.</p>
+        <canvas id="map" width="256" height="256" aria-label="Verdict for every input"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--allow)"></i>ALLOW, under ~10% of TVL per day</span>
+          <span><i style="background:var(--throttle)"></i>THROTTLE, 1% fee stays with LPs</span>
+          <span><i style="background:var(--halt)"></i>HALT, wait for the next epoch</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Try to break it</h2>
+        <p class="sub">Fire random inputs at the live circuit and check its answers. Once the policy registry launches, anyone who finds an answer outside the safety envelope, or a bigger withdrawal that gets a softer verdict than a smaller one, takes the author's transistor bond.</p>
+        <button class="btn" id="breakBtn" type="button">Run 400 on-chain evals</button>
+        <div class="bar"><div id="breakBar"></div></div>
+        <div class="stats-line" id="breakTxt">No run yet.</div>
+        <div class="stats-line" id="breakTotal" style="margin-top:6px"></div>
+        <div class="err-box" id="breakErr"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Roadmap to a live vault</h2>
+    <p class="sub">What is live on mainnet, and what is built and tested but waiting to be deployed.</p>
+    <div class="pipeline">
+      <div class="step"><div class="st live">Live</div><h3>Nerve Season 1</h3><p>The bank-run game, using live circuit #1 as its exit rule. Joins close 28 Sep, 18:24 UTC+7; the season ends 1 Oct, 18:24 UTC+7.</p></div>
+      <div class="step"><div class="st live">Live</div><h3>Processor + WITHDRAW_GUARD</h3><p>Created through the TapeOut factory. Circuit #1 taped out and verified against the spec on mainnet.</p></div>
+      <div class="step"><div class="st ready">Built · proven · ready</div><h3>DRAWDOWN_BREAKER + ALLOCATION_BAND</h3><p>161 and 246 gates, both exhaustively proven. Tape-out is next.</p></div>
+      <div class="step"><div class="st ready">Built · tested · ready</div><h3>PolicyRegistry + StegoVault (with web page)</h3><p>Safety envelopes, transistor bonds, curator approval, 24 h timelock, counterexample slashing, and protection against TapeOut code upgrades. Full flow passes on an X Layer fork.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>25% commitment tracker</h2>
+      <p class="sub">The creator publicly committed, in the on-chain story, to stream 25% of transistor mint proceeds to the authors of active policies. Anyone can check it here.</p>
+      <div class="kv">
+        <div><div class="k">Mint proceeds so far</div><div class="v" id="cProceeds">…</div></div>
+        <div><div class="k">25% owed to authors</div><div class="v" id="cOwed">…</div></div>
+        <div><div class="k">Streamed so far</div><div class="v" id="cPaid">…</div></div>
+      </div>
+      <div class="canvas-cap" id="cNote">Loading…</div>
+    </div>
+  </section>
+
+  <section id="design">
+    <div class="card">
+      <h2>Design the next season's exit rule</h2>
+      <p class="sub">Every Nerve season runs on one exit-rule circuit, and its designer earns <b>10% of that season's pot</b>. Anyone can compete. Your circuit decides, for each withdrawal, ALLOW / THROTTLE / HALT from two numbers: how much of the pool already left today (A) and how big this withdrawal is (B), each in 1/256ths of the pool.</p>
+      <div class="glossary">
+        <div><b>1. Build it</b>: on the <a href="https://tapeout.net" target="_blank" rel="noopener">TapeOut canvas</a>, with 16 inputs (A = pins 0–7, B = pins 8–15) and 2 outputs (verdict = pin0 + 2 × pin1).</div>
+        <div><b>2. Stay inside the safety envelope</b>: small exits (A+B ≤ 12) always ALLOW; exits up to ~15% (A+B ≤ 38) never HALT; above ~25% (A+B &gt; 64) never ALLOW; and a bigger exit never gets a softer verdict.</div>
+        <div><b>3. Tape it out on the Stego processor</b>. That burns 1 STEGO per gate, so smaller designs are cheaper.</div>
+        <div><b>4. Check it</b>: <span class="mono">node scripts/check-candidate.mjs &lt;circuit id&gt;</span> proves all 65,536 inputs. Seasons also refuse unsafe rules on-chain.</div>
+        <div><b>5. Submit</b>: post your circuit ID publicly and tag the project. The curator picks the next season's rule from the passing designs.</div>
+        <div><b>Why it matters</b>: players' money follows your logic, which can never be edited after tape-out, and your circuit NFT collects the reward automatically.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="card faq">
+      <h2>FAQ in plain language</h2>
+      <p class="sub">No jargon needed. Start at the top.</p>
+
+      <details open><summary>What is Stego, in one sentence?</summary><div class="ans">
+        <p>Stego is a savings pool (a "vault") whose safety rules are small, permanent electronic circuits that live on a public blockchain, so nobody can quietly change the rules and anyone can check them.</p>
+      </div></details>
+
+      <details><summary>What problem does it solve?</summary><div class="ans">
+        <p>When you put money in most crypto pools, a team controls the rules and can change them. In a panic, everyone rushes for the exit at once (a "bank run") and the last people out lose the most.</p>
+        <p>Stego writes its rules, such as "no more than about 25% of the pool can leave in one day", into circuits that <b>cannot be edited</b>. The pool must ask the circuit before every deposit and withdrawal and obey its answer.</p>
+      </div></details>
+
+      <details><summary>What are TapeOut, "transistors" and "circuits"? Is this a real chip factory?</summary><div class="ans">
+        <p>No physical chips are made. <a href="https://tapeout.net" target="_blank" rel="noopener">TapeOut</a> copies the chip-making process on a blockchain:</p>
+        <ul>
+          <li><b>Transistor</b>: a token that stands for one logic gate, like one LEGO brick. Stego's are called STEGO.</li>
+          <li><b>Circuit</b>: bricks wired together into something that computes an answer, like a small calculator.</li>
+          <li><b>Tape-out</b>: the moment a design is made permanent. The bricks used are destroyed ("burned") and the circuit is stored on-chain forever.</li>
+        </ul>
+        <p>Stego's first circuit used 112 transistors, and all 112 were burned when it was taped out. You can check this on the blockchain.</p>
+      </div></details>
+
+      <details><summary>What do ALLOW, THROTTLE and HALT mean?</summary><div class="ans">
+        <ul>
+          <li><b>ALLOW</b>: go ahead, no extra cost.</li>
+          <li><b>THROTTLE</b>: allowed, but a small 1% fee is charged, and that fee stays in the pool for the people who remain. It discourages panic.</li>
+          <li><b>HALT</b>: not right now. For withdrawals, this means waiting until the next day's allowance.</li>
+        </ul>
+        <p>Small withdrawals (under about 4.7% of the pool per day) are guaranteed to always be ALLOWed. That's written into the safety envelope, so no circuit can take it away.</p>
+      </div></details>
+
+      <details><summary>Why use a circuit instead of normal code?</summary><div class="ans">
+        <ul>
+          <li><b>It cannot be changed.</b> A taped-out circuit is permanent. To change a rule, a new circuit must be proposed publicly and wait 24 hours, so users can leave first if they disagree.</li>
+          <li><b>It can be checked completely.</b> Each circuit has only 65,536 possible inputs, and we have checked every one of them. This page lets you check it yourself.</li>
+          <li><b>Strangers can safely contribute rules.</b> A circuit can only compute an answer. It cannot move money or call other programs, so running a stranger's circuit is safe.</li>
+        </ul>
+        <p>Honest trade-off: a circuit costs more computing ("gas") than normal code. On X Layer, that is still far less than a cent per check.</p>
+      </div></details>
+
+      <details><summary>Who writes the rules, and what stops a bad rule?</summary><div class="ans">
+        <p>Anyone can design a rule circuit. Each rule type has a <b>safety envelope</b>, a set of limits every design must respect. For example, small withdrawals must always be allowed, and a bigger withdrawal can never get a softer answer than a smaller one.</p>
+        <p>To submit a design, the author must lock up 2,000 STEGO as a <b>bond</b> (a deposit). If anyone finds a single input where the circuit breaks the envelope, that person takes the whole bond. That's called "slashing". So authors are paid to be careful, and checkers are paid to look for mistakes.</p>
+        <p>A curator also has to approve a design before it goes live, and there is a 24-hour wait before any change takes effect.</p>
+      </div></details>
+
+      <details><summary>How does anyone earn money?</summary><div class="ans">
+        <ul>
+          <li><b>Policy authors</b> earn a 0.1% fee on deposits into the vault, plus 25% of STEGO mint proceeds (the creator's public commitment).</li>
+          <li><b>Checkers</b> earn the bond of any circuit they prove wrong.</li>
+          <li><b>People who stay in the pool</b> keep the 1% THROTTLE fees paid by people rushing out.</li>
+        </ul>
+        <p>Honest note: none of these produce meaningful income until the vault holds real deposits. The vault is not live yet (see the roadmap).</p>
+      </div></details>
+
+      <details><summary>How do I use the vault?</summary><div class="ans">
+        <p>Connect your wallet, type an amount and press Deposit. Your wallet asks you three times: to "wrap" OKB into WOKB (the token form apps use), to approve the vault, and to deposit. To leave, type an amount and press Withdraw. The page tells you in advance whether the circuit says ALLOW (free), THROTTLE (1% fee that stays with the others) or HALT (come back tomorrow).</p>
+        <p>If you are the only depositor, you can only take out about a quarter of the vault per day. That's the same rule for everyone, and it's what protects people from a bank run.</p>
+      </div></details>
+
+      <details><summary>How does the Nerve game work, and can I lose money?</summary><div class="ans">
+        <p>You deposit 0.01–0.05 OKB. If you <b>stay until the season ends</b>, you get your full deposit back <b>plus</b> a share of the pot. Shares are weighted by amount × time, so the earlier you join, the bigger your share. Before you join, the page shows exactly what you'd get if everyone stays. If you <b>leave early</b>, you pay a fee into the pot: 2% on a calm day, 10% during a rush. If too many people leave on the same day (about a quarter of the pool), the circuit says HALT and you wait until tomorrow.</p>
+        <p>What you can lose: the one-time ticket (about 0.0013 OKB, which buys and burns 10 STEGO) and any fee you pay by leaving early. Nobody, including the creator, can take the deposits. The contract has no admin at all.</p>
+        <p>Winning pot shares depend on other people leaving early, so the pot may be small if everyone holds.</p>
+      </div></details>
+
+      <details><summary>What is STEGO Boost?</summary><div class="ans">
+        <p>While joining is open, you can burn STEGO to make your pot share bigger: +5% for every 10 STEGO, up to +50% (100 STEGO, about 0.0073 OKB). The page tells you whether a boost is worth it at the current pot size before you buy. Burned STEGO is gone forever, so it makes the rest scarcer.</p>
+      </div></details>
+
+      <details><summary>Can I design a season's rule and get paid?</summary><div class="ans">
+        <p>Yes. See "Design the next season's exit rule" above. If your circuit is chosen, you receive 10% of that season's pot, paid automatically to whoever owns the circuit NFT.</p>
+      </div></details>
+
+      <details><summary>What is live today, and what is not?</summary><div class="ans">
+        <p><b>Live on X Layer:</b> the Stego processor and the withdrawal-limit circuit (#1). Everything in the live panel above is read directly from the blockchain.</p>
+        <p><b>Built and tested, not yet deployed:</b> two more circuits, the rules registry and the vault itself.</p>
+      </div></details>
+
+      <details><summary>What are the risks?</summary><div class="ans">
+        <ul>
+          <li>The code has not been professionally audited. Deposits will start capped at 5 OKB in total.</li>
+          <li>TapeOut can upgrade its own platform code. If that happens, Stego automatically stops trusting the circuits and freezes penalties until the upgrade is reviewed. Withdrawals always stay possible.</li>
+          <li>The daily withdrawal limit means a very large exit may have to wait until the next day.</li>
+        </ul>
+      </div></details>
+
+      <h2 style="margin-top:22px">Glossary</h2>
+      <div class="glossary">
+        <div><b>X Layer</b>: OKX's blockchain network. Fees are tiny fractions of a cent.</div>
+        <div><b>OKB / WOKB</b>: X Layer's currency, and its "wrapped" token form used by apps.</div>
+        <div><b>Vault</b>: a shared pool of funds that follows fixed rules.</div>
+        <div><b>TVL</b>: total value locked, the size of the pool.</div>
+        <div><b>Epoch</b>: one day. Withdrawal allowances reset each epoch.</div>
+        <div><b>Drawdown</b>: how far the pool's value has fallen from its highest point.</div>
+        <div><b>eval()</b>: asking a circuit for its answer. Free to read, and anyone can do it.</div>
+        <div><b>Bond / slashing</b>: a deposit an author locks up, lost to whoever proves their circuit wrong.</div>
+        <div><b>Curator</b>: the account that approves which designs go live. Changes still wait 24 hours.</div>
+        <div><b>Processor</b>: the on-chain "factory line" that holds Stego's circuits, created through TapeOut.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>On-chain facts</h2>
+      <table class="facts">
+        <tbody id="facts"></tbody>
+      </table>
+      <div class="story" id="story">Loading on-chain story…</div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  Stego · built on <a href="https://tapeout.net" target="_blank" rel="noopener">TapeOut</a> × X Layer for the Ignix Genesis Transistor Hackathon. Unaudited hackathon build. All data is read directly from X Layer RPC; no backend.
+</footer>
+
+<script>
+const CFG = {
+  rpcs: ["https://xlayerrpc.okx.com", "https://rpc.xlayer.tech"],
+  factory: "0x1f09DAeFA827f02CBb40967cc91b259763760761",
+  processor: "0x0d90BA20B57D63b8eEA92d674ef87284B2EB290C",
+  transistors: "0x3775Ada4083fDbCc4A3CA0e3d38f15d17C187225",
+  creator: "0xC4AAaf5BD7e688F19F70E1e5067aF4c2d1307A74",
+  multicall: "0xcA11bde05977b3631167028862bE2a173976CA11",
+  circuitId: 1,
+  registry: "0x0A184781674dc6dC6C689f72235a10A2d7D5B37d",
+  nerve: "0x23AE0d6b490407c378a1496C6B834238Cc2D78Bd", // Stego Nerve - Season 1 (0xA5D3…F098 was a rehearsal, never promoted)
+  vault: "0x784Ba316b123b7099631FB834D9aC2D6B31e8b75",
+  wokb: "0xe538905cf8410324e03A5A23C1c177a474D59b2b",
+  explorer: "https://www.oklink.com/xlayer",
+};
+
+// Mirror of WithdrawGuardSpecV1 / circuits/policies.mjs
+const spec = (a, b) => { const s = a + b; return s <= 25 ? 0 : s <= 64 ? 1 : 2; };
+// Mirror of WithdrawEnvelopeV1: what ANY withdraw design must obey
+const envelope = (a, b, v) => { const s = a + b; if (s <= 12 && v !== 0) return false; if (s <= 38 && v === 2) return false; if (s > 64 && v === 0) return false; return true; };
+const envelopeRule = (a, b) => { const s = a + b; return s <= 12 ? "must ALLOW here" : s <= 38 ? "must not HALT here" : s > 64 ? "must not ALLOW here" : "designer's choice"; };
+const NAMES = ["ALLOW", "THROTTLE", "HALT"];
+const WHY = [
+  "Within the free daily exit budget (≤ ~10% of TVL).",
+  "Above the free budget: allowed, and a 1% fee stays with the remaining LPs.",
+  "Over ~25% of TVL this epoch: this request must wait for the next epoch.",
+];
+
+const $ = (id) => document.getElementById(id);
+const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+const fmt = (n) => Number(n).toLocaleString("en-US");
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------------------------------------------------------------- theme
+(function theme() {
+  let saved = null;
+  try { saved = localStorage.getItem("stego-theme"); } catch (_) {}
+  if (saved) document.documentElement.dataset.theme = saved;
+  $("themeBtn").onclick = () => {
+    const dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("stego-theme", next); } catch (_) {}
+    drawMap(); drawDie();
+  };
+})();
+
+// ---------------------------------------------------------------- chain
+let provider;
+async function getProvider() {
+  if (provider) return provider;
+  for (const url of CFG.rpcs) {
+    try {
+      const p = new ethers.JsonRpcProvider(url, 196, { staticNetwork: true, batchMaxCount: 1 });
+      await p.getBlockNumber();
+      provider = p;
+      return p;
+    } catch (_) {}
+  }
+  throw new Error("No X Layer RPC reachable");
+}
+const PROC_ABI = [
+  "function eval(uint256,bytes) view returns (bytes)",
+  "function circuitInfo(uint256) view returns (uint32,uint32,uint32,uint32)",
+  "function netlist(uint256) view returns (bytes)",
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+];
+const TR_ABI = [
+  "function supplyCap() view returns (uint256)",
+  "function mintPrice() view returns (uint256)",
+  "function minted() view returns (uint256)",
+  "function story() view returns (string)",
+];
+const FAC_ABI = ["function isCPU(address) view returns (bool)"];
+const MC_ABI = ["function aggregate3((address target,bool allowFailure,bytes callData)[] calls) view returns ((bool success,bytes returnData)[])"];
+const procIface = new ethers.Interface(PROC_ABI);
+
+// ---------------------------------------------------------------- netlist simulator (bit-exact with eval)
+let NET = null; // { gates: Int32Array pairs, nIn, nOut }
+function decode(hex, nIn) {
+  const b = ethers.getBytes(hex);
+  const gates = [];
+  for (let p = 0; p < b.length;) {
+    const op = b[p++];
+    if (op !== 0) throw new Error("unexpected opcode " + op);
+    const a = (b[p] << 16) | (b[p + 1] << 8) | b[p + 2];
+    const c = (b[p + 3] << 16) | (b[p + 4] << 8) | b[p + 5];
+    p += 6;
+    gates.push(a, c);
+  }
+  return { gates: Int32Array.from(gates), nIn };
+}
+function simulate(a, b, keep) {
+  const { gates, nIn } = NET;
+  const n = gates.length / 2;
+  const v = keep || new Uint8Array(2 + nIn + n);
+  v[0] = 0; v[1] = 1;
+  for (let i = 0; i < 8; i++) { v[2 + i] = (a >> i) & 1; v[10 + i] = (b >> i) & 1; }
+  for (let g = 0; g < n; g++) v[2 + nIn + g] = 1 - (v[gates[2 * g]] & v[gates[2 * g + 1]]);
+  const total = 2 + nIn + n;
+  return { out: v[total - 2] | (v[total - 1] << 1), v };
+}
+const norm = (x) => (x > 2 ? 2 : x);
+
+// ---------------------------------------------------------------- UI: pins, die, map
+function renderPins(a, b, outByte) {
+  const pin = (on, label) => `<span class="pin${on ? " on" : ""}" title="${label}">${on}</span>`;
+  let h = "";
+  for (let i = 0; i < 8; i++) h += pin((a >> i) & 1, "A bit " + i);
+  h += '<span class="sep"></span>';
+  for (let i = 0; i < 8; i++) h += pin((b >> i) & 1, "B bit " + i);
+  $("pinsIn").innerHTML = h + '<span class="lbl">16 input pins: A (pins 0–7), B (pins 8–15), LSB first</span>';
+  $("pinsOut").innerHTML = (outByte == null ? "" : pin(outByte & 1, "out pin 0") + pin((outByte >> 1) & 1, "out pin 1")) +
+    '<span class="lbl">2 output pins → verdict = pin0 + 2·pin1</span>';
+}
+
+let lastV = null;
+function drawDie() {
+  const c = $("die");
+  if (!NET || !lastV) return;
+  const n = NET.gates.length / 2;
+  const cols = Math.ceil(Math.sqrt(n));
+  const rows = Math.ceil(n / cols);
+  const cell = Math.floor(Math.min(256 / cols, 256 / rows));
+  c.width = cols * cell; c.height = rows * cell;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = cssVar("--surface-2"); ctx.fillRect(0, 0, c.width, c.height);
+  const on = cssVar("--gate-on"), off = cssVar("--gate-off");
+  const base = 2 + NET.nIn;
+  for (let g = 0; g < n; g++) {
+    ctx.fillStyle = lastV[base + g] ? on : off;
+    const x = (g % cols) * cell, y = Math.floor(g / cols) * cell;
+    ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+  }
+}
+
+let MAP = null; // Uint8Array(65536) of verdicts
+function buildMap() {
+  MAP = new Uint8Array(65536);
+  const buf = new Uint8Array(2 + NET.nIn + NET.gates.length / 2);
+  for (let b = 0; b < 256; b++) for (let a = 0; a < 256; a++) MAP[b * 256 + a] = norm(simulate(a, b, buf).out);
+}
+function drawMap() {
+  if (!MAP) return;
+  const c = $("map"), ctx = c.getContext("2d");
+  const img = ctx.createImageData(256, 256);
+  const cols = [cssVar("--allow"), cssVar("--throttle"), cssVar("--halt")].map(hexToRgb);
+  for (let b = 0; b < 256; b++) for (let a = 0; a < 256; a++) {
+    const k = ((255 - b) * 256 + a) * 4, col = cols[MAP[b * 256 + a]];
+    img.data[k] = col[0]; img.data[k + 1] = col[1]; img.data[k + 2] = col[2]; img.data[k + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const a = +$("sA").value, b = +$("sB").value;
+  ctx.strokeStyle = cssVar("--ink"); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(a + .5, 0); ctx.lineTo(a + .5, 256); ctx.moveTo(0, 255 - b + .5); ctx.lineTo(256, 255 - b + .5); ctx.stroke();
+}
+function hexToRgb(h) {
+  h = h.replace("#", "");
+  if (h.length === 3) h = h.split("").map((x) => x + x).join("");
+  return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+}
+
+// ---------------------------------------------------------------- live evaluation
+let evalSeq = 0, evalTimer = null;
+function onSlide() {
+  const a = +$("sA").value, b = +$("sB").value;
+  $("lA").textContent = `${a} / 256 ≈ ${(a / 2.56).toFixed(1)}% of TVL`;
+  $("lB").textContent = `${b} / 256 ≈ ${(b / 2.56).toFixed(1)}% of TVL`;
+  $("inHex").textContent = a.toString(16).padStart(2, "0") + b.toString(16).padStart(2, "0");
+  renderPins(a, b, null);
+  if (NET) {
+    const r = simulate(a, b);
+    lastV = r.v; drawDie();
+    $("pSim").textContent = `0x0${r.out} → ${NAMES[norm(r.out)]}`;
+  }
+  $("pSpec").textContent = `${spec(a, b)} → ${NAMES[spec(a, b)]}`;
+  $("pEnv").innerHTML = `<span class="ok-t">${envelopeRule(a, b)} ✓</span>`;
+  drawMap();
+  clearTimeout(evalTimer);
+  evalTimer = setTimeout(() => evalChain(a, b), 180);
+}
+async function evalChain(a, b) {
+  const seq = ++evalSeq;
+  $("pChain").textContent = "…";
+  try {
+    const p = await getProvider();
+    const proc = new ethers.Contract(CFG.processor, PROC_ABI, p);
+    const out = ethers.getBytes(await proc.eval(CFG.circuitId, Uint8Array.of(a, b)))[0];
+    if (seq !== evalSeq) return;
+    const v = norm(out & 3);
+    $("pChain").textContent = `0x0${out} → ${NAMES[v]}`;
+    renderPins(a, b, out);
+    const badge = $("badge");
+    badge.textContent = NAMES[v];
+    badge.className = "badge v" + v;
+    $("why").textContent = WHY[v];
+    const sim = NET ? norm(simulate(a, b).out) : null;
+    const ok = v === spec(a, b) && envelope(a, b, v) && (sim === null || sim === v);
+    $("pAgree").innerHTML = ok ? '<span class="ok-t">✓ chain = simulation = design, inside envelope</span>' : '<span class="bad-t">✗ mismatch: counterexample!</span>';
+  } catch (e) {
+    if (seq !== evalSeq) return;
+    $("pChain").textContent = "RPC error";
+    $("why").textContent = "Could not reach X Layer RPC. Retrying on next change.";
+  }
+}
+
+// ---------------------------------------------------------------- break it
+let totalRuns = 0, totalEvals = 0;
+$("breakBtn").onclick = async () => {
+  const btn = $("breakBtn"); btn.disabled = true;
+  $("breakErr").style.display = "none";
+  const N = 400, CH = 40;
+  let done = 0, bad = 0;
+  try {
+    const p = await getProvider();
+    const mc = new ethers.Contract(CFG.multicall, MC_ABI, p);
+    for (let i = 0; i < N; i += CH) {
+      const ins = Array.from({ length: CH }, () => [Math.random() * 256 | 0, Math.random() * 256 | 0]);
+      const calls = ins.map(([a, b]) => ({ target: CFG.processor, allowFailure: false, callData: procIface.encodeFunctionData("eval", [CFG.circuitId, Uint8Array.of(a, b)]) }));
+      const res = await mc.aggregate3(calls);
+      res.forEach((r, k) => {
+        const out = ethers.getBytes(procIface.decodeFunctionResult("eval", r.returnData)[0])[0];
+        const v = norm(out & 3);
+        if (v !== spec(ins[k][0], ins[k][1]) || !envelope(ins[k][0], ins[k][1], v)) bad++;
+      });
+      done += CH;
+      $("breakBar").style.width = (100 * done / N) + "%";
+      $("breakTxt").textContent = `${done} / ${N} on-chain evals · ${bad} mismatches`;
+    }
+    totalRuns++; totalEvals += done;
+    $("breakTxt").innerHTML = bad
+      ? `<span class="bad-t">${bad} mismatches found in ${done} evals</span>`
+      : `<span class="ok-t">${done} / ${done} correct and inside the safety envelope.</span> The circuit held.`;
+    $("breakTotal").textContent = `This session: ${fmt(totalEvals)} live evals across ${totalRuns} run${totalRuns > 1 ? "s" : ""}. Exhaustive off-chain proof: 65,536 / 65,536.`;
+  } catch (e) {
+    $("breakErr").textContent = "RPC busy or unreachable. Try again in a moment.";
+    $("breakErr").style.display = "block";
+  } finally { btn.disabled = false; }
+};
+
+// ---------------------------------------------------------------- load facts
+async function load() {
+  try {
+    const p = await getProvider();
+    const proc = new ethers.Contract(CFG.processor, PROC_ABI, p);
+    const tr = new ethers.Contract(CFG.transistors, TR_ABI, p);
+    const fac = new ethers.Contract(CFG.factory, FAC_ABI, p);
+    const [block, isCpu, name, symbol, cap, price, minted, story, info, nl] = await Promise.all([
+      p.getBlockNumber(), fac.isCPU(CFG.processor), proc.name(), proc.symbol(), tr.supplyCap(), tr.mintPrice(),
+      tr.minted(), tr.story(), proc.circuitInfo(CFG.circuitId), proc.netlist(CFG.circuitId),
+    ]);
+    // count circuits and gates (ids start at 1)
+    let circuits = 0, burned = 0;
+    for (let id = 1; id < 64; id++) {
+      try { const ci = await proc.circuitInfo(id); if (Number(ci[0]) === 0 && Number(ci[3]) === 0) break; circuits++; burned += Number(ci[3]); }
+      catch (_) { break; }
+    }
+    $("netDot").className = "dot ok";
+    $("netTxt").textContent = `X Layer mainnet · block ${fmt(block)}`;
+    $("tProc").textContent = isCpu ? `${name} ✓` : name;
+    $("tProcAddr").innerHTML = `<a href="${CFG.explorer}/address/${CFG.processor}" target="_blank" rel="noopener">${short(CFG.processor)}</a>`;
+    $("tCirc").textContent = fmt(circuits);
+    $("tCircS").textContent = "flat NAND, 16 in → 2 out";
+    $("tMinted").textContent = fmt(minted);
+    $("tCap").textContent = `of ${fmt(cap)} cap · ${ethers.formatEther(price)} OKB each`;
+    $("tBurned").textContent = fmt(burned);
+
+    NET = decode(nl, Number(info[0]));
+    $("gateCount").textContent = fmt(Number(info[3]));
+    buildMap();
+
+    const nlHash = ethers.keccak256(nl);
+    const rows = [
+      ["Factory check", isCpu ? '<span class="ok-t">isCPU = true (created through the TapeOut factory)</span>' : '<span class="bad-t">not a factory processor</span>'],
+      ["Processor", link(CFG.processor)],
+      ["Transistors (ERC-1155)", link(CFG.transistors)],
+      ["Deployment wallet", link(CFG.creator)],
+      ["Supply cap / price", `${fmt(cap)} ${symbol} · ${ethers.formatEther(price)} OKB (immutable)`],
+      ["Circuit #1 netlist", `<span class="mono">${nl.length / 2 - 1} bytes · keccak ${nlHash.slice(0, 18)}…</span>`],
+    ];
+    $("facts").innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+    $("story").textContent = "On-chain story: " + story;
+    const proceeds = minted * price;
+    $("cProceeds").textContent = ethers.formatEther(proceeds) + " OKB";
+    $("cOwed").textContent = ethers.formatEther(proceeds / 4n) + " OKB";
+    let paid = 0n;
+    if (CFG.registry) {
+      const reg = new ethers.Contract(CFG.registry, ["function notifiedBy(address) view returns (uint256)"], p);
+      paid = await reg.notifiedBy(CFG.creator).catch(() => 0n);
+    }
+    $("cPaid").textContent = ethers.formatEther(paid) + " OKB";
+    $("cNote").textContent = CFG.registry
+      ? (paid >= proceeds / 4n ? "Commitment fully honoured. The streamed total is recorded on-chain in PolicyRegistry.notifiedBy(creator)." : "Streamed so far is read from PolicyRegistry.notifiedBy(creator). The creator tops it up with the HonourCommitment script.")
+      : "The policy registry is not deployed yet, so nothing can be streamed. The owed amount carries forward and will be paid when it launches. All mints so far are the creator's own bootstrap mints for circuit #1.";
+    onSlide();
+  } catch (e) {
+    // Public X Layer nodes sometimes reject bursts of requests; retry a few times before giving up.
+    loadAttempts++;
+    if (loadAttempts < 5) {
+      $("netTxt").textContent = `X Layer node busy, retrying (${loadAttempts}/4)…`;
+      setTimeout(load, 1500 * loadAttempts);
+      return;
+    }
+    $("netDot").className = "dot err";
+    $("netTxt").textContent = "X Layer RPC unreachable";
+    $("why").textContent = "Could not load chain data. Refresh to retry.";
+  }
+}
+let loadAttempts = 0;
+const link = (a) => `<a class="mono" href="${CFG.explorer}/address/${a}" target="_blank" rel="noopener">${a}</a>`;
+
+
+// ---------------------------------------------------------------- Nerve Season
+const NERVE_ABI = [
+  "function name() view returns (string)",
+  "function ticketCost() view returns (uint256)",
+  "function joinQuote(address, uint256) view returns (uint256 share, uint256 ticket)",
+  "function exitQuote(uint256) view returns (uint8 v, uint256 fee, uint8 a, uint8 b)",
+  "function maxExit(address) view returns (uint256)",
+  "function projectedPayout(address) view returns (uint256, uint256)",
+  "function principal(address) view returns (uint256)",
+  "function hasTicket(address) view returns (bool)",
+  "function pot() view returns (uint256)",
+  "function players() view returns (uint256)",
+  "function activePlayers() view returns (uint256)",
+  "function totalPrincipal() view returns (uint256)",
+  "function joinDeadline() view returns (uint64)",
+  "function seasonEnd() view returns (uint64)",
+  "function day() view returns (uint64)",
+  "function dayStartPrincipal() view returns (uint256)",
+  "function dayOutflow() view returns (uint256)",
+  "function ticketsBurned() view returns (uint256)",
+  "function settled() view returns (bool)",
+  "function join() payable",
+  "function fund() payable",
+  "function boost(uint256) payable",
+  "function boostCost(uint256) view returns (uint256)",
+  "function boostQuote(address, uint256) view returns (uint256 extraShare, uint256 cost)",
+  "function boostBps(address) view returns (uint256)",
+  "function boostBurned() view returns (uint256)",
+  "function circuitId() view returns (uint256)",
+  "error NotPlaying()", "error BoostCap()", "error WrongValue(uint256 sent, uint256 need)",
+  "function exit(uint256)",
+  "function claim()",
+  "error JoinClosed()", "error SeasonOver()", "error SeasonNotOver()", "error TooSmall()", "error WalletCap()",
+  "error SeasonFull()", "error BadAmount()", "error ExitHalted(uint8 a, uint8 b)", "error NothingToClaim()",
+];
+const NERVE_ERR = {
+  JoinClosed: "Joining is closed for this season.",
+  SeasonOver: "The season has ended. Use Claim instead.",
+  SeasonNotOver: "The season has not ended yet.",
+  TooSmall: "Deposit too small. The minimum is 0.01 OKB after the ticket.",
+  WalletCap: "That would put you over the 0.05 OKB per-wallet limit.",
+  SeasonFull: "The season is full.",
+  BadAmount: "Enter an amount between 0 and your deposit.",
+  ExitHalted: "HALT: today's exit allowance is used up. Try a smaller amount or come back tomorrow.",
+  NothingToClaim: "Nothing to claim for this wallet.",
+  NotPlaying: "Join the season first, then boost.",
+  BoostCap: "That would take you above the +50% boost limit.",
+  WrongValue: "The boost price changed; refresh and try again.",
+};
+/// Blockchain time (latest block), so day boundaries match the contracts even if the device clock is off.
+async function chainNow() {
+  try { const b = await (await getProvider()).getBlock("latest"); return Number(b.timestamp); } catch (_) { return Math.floor(Date.now() / 1000); }
+}
+const okb = (w, d = 4) => Number(ethers.formatEther(w)).toFixed(d).replace(/\.?0+$/, "") + " OKB";
+const until = (t) => {
+  const s = Number(t) - Math.floor(Date.now() / 1000);
+  if (s <= 0) return "ended";
+  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
+};
+let N = { signer: null, account: null, st: null };
+
+async function nerveRead() {
+  if (!CFG.nerve) {
+    $("nPhase").textContent = "not deployed yet";
+    $("nNote").textContent = "Season 1 has not been deployed yet. The rules above are final and fully tested against the live circuit on a mainnet fork.";
+    ["nPot", "nPlayers", "nPool", "nToday", "nJoinIn", "nEndIn"].forEach((id) => ($(id).textContent = "–"));
+    $("nConnect").disabled = true;
+    $("nConnect").textContent = "Opens at Season 1 launch";
+    return;
+  }
+  try {
+    const p = await getProvider();
+    const c = new ethers.Contract(CFG.nerve, NERVE_ABI, p);
+    const [pot, players, active, total, jd, end, day, dStart, dOut, burned, settled, tc, sname, bBurned, cid] = await Promise.all([
+      c.pot(), c.players(), c.activePlayers(), c.totalPrincipal(), c.joinDeadline(), c.seasonEnd(), c.day(),
+      c.dayStartPrincipal(), c.dayOutflow(), c.ticketsBurned(), c.settled(), c.ticketCost(), c.name().catch(() => ""),
+      c.boostBurned().catch(() => 0n), c.circuitId().catch(() => 1n),
+    ]);
+    const designer = await new ethers.Contract(CFG.processor, ["function ownerOf(uint256) view returns (address)"], p).ownerOf(cid).catch(() => null);
+    if (sname) $("nTitle").textContent = sname;
+    N.st = { jd: Number(jd), end: Number(end), settled, tc };
+    const now = await chainNow();
+    const today = BigInt(Math.floor(now / 86400)) === day;
+    const base = today ? (dStart > total ? dStart : total) : total;
+    const out = today ? dOut : 0n;
+    const pct = base > 0n ? Number((out * 10000n) / base) / 100 : 0;
+    $("nPhase").textContent = now < N.st.jd ? "open to join" : now < N.st.end ? "holding, no new joins" : settled ? "settled" : "ended, claim open";
+    $("nPot").textContent = okb(pot);
+    $("nPlayers").textContent = `${fmt(active)} / ${fmt(players)}`;
+    $("nPool").textContent = okb(total);
+    $("nToday").textContent = `${pct.toFixed(1)}%`;
+    $("nJoinIn").textContent = until(jd);
+    $("nEndIn").textContent = until(end);
+    $("nTicket").textContent = Number(ethers.formatEther(tc)).toFixed(5);
+    $("nNote").innerHTML = `Players in = still holding / ever joined. Today's exits = share of the pool that left today; around 10% is calm, above 25% the circuit HALTs. ${fmt(burned)} STEGO burned as tickets, ${fmt(bBurned)} as boosts. Exit rule: circuit #${cid}${designer ? ` designed by <span class="mono">${short(designer)}</span>` : ""}. Contract: <a class="mono" href="${CFG.explorer}/address/${CFG.nerve}" target="_blank" rel="noopener">${short(CFG.nerve)}</a>`;
+    if (N.account) await nerveSeat();
+    nerveJoinQuote();
+  } catch (e) {
+    $("nNote").textContent = "Could not read the season (RPC busy). Retrying shortly.";
+  }
+}
+
+async function nerveSeat() {
+  const p = await getProvider();
+  const c = new ethers.Contract(CFG.nerve, NERVE_ABI, p);
+  const [mine, proj, ticket] = await Promise.all([c.principal(N.account), c.projectedPayout(N.account), c.hasTicket(N.account)]);
+  $("nMine").textContent = okb(mine);
+  $("nProj").textContent = okb(proj[0] + proj[1]);
+  const now = await chainNow();
+  const ended = N.st && now >= N.st.end;
+  $("nClaimBtn").style.display = ended && mine > 0n ? "" : "none";
+  $("nFundBox").style.display = ended ? "none" : "";
+  const joinOpen = N.st && now < N.st.jd;
+  const cur = Number(await c.boostBps(N.account));
+  $("nBoostBox").style.display = joinOpen && mine > 0n ? "" : "none";
+  const left = (5000 - cur) / 500;
+  $("nBoostUnits").innerHTML = left <= 0 ? '<option value="0">max boost reached</option>'
+    : Array.from({ length: left }, (_, i) => `<option value="${i + 1}">+${(cur + (i + 1) * 500) / 100}% (${(i + 1) * 10} STEGO)</option>`).join("");
+  $("nBoostBtn").disabled = left <= 0;
+  nerveBoostQuote();
+  $("nJoinBtn").disabled = !N.st || now >= N.st.jd;
+  $("nExitBtn").disabled = ended || mine === 0n;
+  $("nJoinHint").textContent = N.st
+    ? (ticket ? "You already have a ticket, so no ticket cost." : `First join adds the ticket: ${Number(ethers.formatEther(N.st.tc)).toFixed(5)} OKB (10 STEGO minted and burned).`)
+    : "";
+  if (mine > 0n && !ended) {
+    const max = await c.maxExit(N.account);
+    $("nExitAmt").max = ethers.formatEther(mine);
+    $("nQuote").dataset.max = ethers.formatEther(max);
+  }
+  nerveQuote();
+}
+
+async function nerveBoostQuote() {
+  if (!CFG.nerve || !N.account) return;
+  const units = Number($("nBoostUnits").value || 0);
+  if (!units) { $("nBoostQuote").textContent = "You already have the maximum +50% boost."; return; }
+  try {
+    const c = new ethers.Contract(CFG.nerve, NERVE_ABI, await getProvider());
+    const [extra, cost] = await c.boostQuote(N.account, units);
+    $("nBoostQuote").innerHTML = `Costs ${okb(cost, 5)} (${units * 10} STEGO minted and burned). If everyone stays, it adds about ${okb(extra, 5)} to your pot share: ` +
+      `<span class="${extra >= cost ? "ok-t" : "bad-t"}">${extra >= cost ? "worth it right now" : "costs more than it adds right now"}</span>. More players joining changes this.`;
+  } catch (_) { $("nBoostQuote").textContent = ""; }
+}
+
+let joinQuoteTimer = null;
+function nerveJoinQuote() {
+  clearTimeout(joinQuoteTimer);
+  joinQuoteTimer = setTimeout(async () => {
+    if (!CFG.nerve) return;
+    const raw = $("nJoinAmt").value;
+    if (!raw || Number(raw) <= 0) { $("nJoinQuote").textContent = ""; return; }
+    try {
+      const amt = ethers.parseEther(raw);
+      const c = new ethers.Contract(CFG.nerve, NERVE_ABI, await getProvider());
+      const who = N.account || ethers.ZeroAddress;
+      const [share, ticket] = await c.joinQuote(who, amt);
+      const net = share - ticket;
+      const pct = Number((net * 10000n) / amt) / 100;
+      $("nJoinQuote").innerHTML = `If everyone stays to the end: you get back ${okb(amt, 4)} + ${okb(share, 5)} from the pot` +
+        (ticket > 0n ? `, minus the ${okb(ticket, 5)} ticket` : "") +
+        ` = <span class="${net >= 0n ? "ok-t" : "bad-t"}">${net >= 0n ? "+" : ""}${pct.toFixed(1)}%</span>. Based on who has joined so far: more players joining will shrink this, people leaving early will grow it, and joining later earns less.`;
+    } catch (_) { $("nJoinQuote").textContent = ""; }
+  }, 250);
+}
+
+let quoteTimer = null;
+function nerveQuote() {
+  clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(async () => {
+    if (!CFG.nerve) return;
+    const raw = $("nExitAmt").value;
+    if (!raw || Number(raw) <= 0) { $("nQuote").textContent = "Enter an amount to see what the circuit charges."; return; }
+    try {
+      const amt = ethers.parseEther(raw);
+      const c = new ethers.Contract(CFG.nerve, NERVE_ABI, await getProvider());
+      const q = await c.exitQuote(amt);
+      const v = Number(q[0]);
+      const max = $("nQuote").dataset.max;
+      $("nQuote").innerHTML = v >= 2
+        ? `<span class="bad-t">HALT</span>: today's exit allowance is used up.${max ? ` The most you can take today is ${Number(max).toFixed(4)} OKB.` : ""}`
+        : `<span class="${v ? "bad-t" : "ok-t"}">${NAMES[v]}</span>: fee ${okb(q[1], 5)} goes to the stayers' pot, and you receive ${okb(amt - q[1], 5)}. (Circuit input A=${q[2]}, B=${q[3]})`;
+    } catch (_) { $("nQuote").textContent = "Enter a valid amount."; }
+  }, 250);
+}
+
+async function nerveConnect() {
+  const eth = window.okxwallet || window.ethereum;
+  if (!eth) { $("nTx").textContent = "No wallet found. Install OKX Wallet or MetaMask, then reload."; return; }
+  try {
+    await eth.request({ method: "eth_requestAccounts" });
+    try {
+      await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0xc4" }] });
+    } catch (e) {
+      if (e && e.code === 4902) {
+        await eth.request({ method: "wallet_addEthereumChain", params: [{ chainId: "0xc4", chainName: "X Layer", nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 }, rpcUrls: [CFG.rpcs[0]], blockExplorerUrls: [CFG.explorer] }] });
+      } else throw e;
+    }
+    const bp = new ethers.BrowserProvider(eth);
+    N.signer = await bp.getSigner();
+    N.account = await N.signer.getAddress();
+    $("nAddr").textContent = "Connected: " + short(N.account);
+    if (CFG.nerve) {
+      $("nConnect").style.display = "none";
+      $("nSeat").style.display = "";
+      await nerveSeat();
+    }
+  } catch (e) {
+    $("nTx").textContent = "Wallet connection was cancelled or failed.";
+  }
+}
+
+/// Wallets nest revert data differently; find any hex blob in the error and decode it.
+function nerveErrName(e) {
+  if (e?.revert?.name) return e.revert.name;
+  const iface = new ethers.Interface(NERVE_ABI);
+  let blob = "";
+  try { blob = JSON.stringify(e, Object.getOwnPropertyNames(e || {})); } catch (_) { blob = String(e); }
+  for (const hex of blob.match(/0x[0-9a-fA-F]{8,}/g) || []) {
+    try { const p = iface.parseError(hex); if (p) return p.name; } catch (_) {}
+  }
+  return null;
+}
+
+async function nerveSend(label, fn) {
+  $("nTx").textContent = `${label}: confirm in your wallet…`;
+  try {
+    const net = await N.signer.provider.getNetwork();
+    if (net.chainId !== 196n) throw new Error("Switch your wallet to X Layer (chain 196).");
+    const tx = await fn(new ethers.Contract(CFG.nerve, NERVE_ABI, N.signer));
+    $("nTx").innerHTML = `${label}: sent, waiting… <a href="${CFG.explorer}/tx/${tx.hash}" target="_blank" rel="noopener">view</a>`;
+    await tx.wait();
+    $("nTx").innerHTML = `${label}: done ✓ <a href="${CFG.explorer}/tx/${tx.hash}" target="_blank" rel="noopener">view on OKLink</a>`;
+    await nerveRead();
+  } catch (e) {
+    const name = nerveErrName(e);
+    const msg = (name && NERVE_ERR[name]) || friendlyWalletError(e);
+    $("nTx").textContent = `${label} failed: ${msg}`;
+  }
+}
+
+$("nConnect").onclick = nerveConnect;
+$("nExitAmt").addEventListener("input", nerveQuote);
+$("nJoinAmt").addEventListener("input", nerveJoinQuote);
+$("nJoinBtn").onclick = async () => {
+  const amt = ethers.parseEther($("nJoinAmt").value || "0");
+  const c = new ethers.Contract(CFG.nerve, NERVE_ABI, await getProvider());
+  // the ticket is charged once per wallet, even if the player left and came back
+  const cost = (await c.hasTicket(N.account)) ? 0n : N.st.tc;
+  await nerveSend("Join", (w) => w.join({ value: amt + cost }));
+};
+$("nExitBtn").onclick = () => nerveSend("Leave", (w) => w.exit(ethers.parseEther($("nExitAmt").value || "0")));
+$("nClaimBtn").onclick = () => nerveSend("Claim", (w) => w.claim());
+$("nBoostUnits").addEventListener("change", nerveBoostQuote);
+$("nBoostBtn").onclick = async () => {
+  const units = Number($("nBoostUnits").value || 0);
+  const c = new ethers.Contract(CFG.nerve, NERVE_ABI, await getProvider());
+  const cost = await c.boostCost(units);
+  await nerveSend("Boost", (w) => w.boost(units, { value: cost }));
+};
+$("nFundBtn").onclick = () => nerveSend("Add to pot", (w) => w.fund({ value: ethers.parseEther($("nFundAmt").value || "0") }));
+setTimeout(nerveRead, 1200);
+setInterval(nerveRead, 30000);
+
+// ---------------------------------------------------------------- Stego Vault + PolicyRegistry
+const VAULT_ABI = [
+  "function totalAssets() view returns (uint256)",
+  "function sharePrice() view returns (uint256)",
+  "function depositCap() view returns (uint256)",
+  "function maxDeposit(address) view returns (uint256)",
+  "function maxWithdraw(address) view returns (uint256)",
+  "function balanceOf(address) view returns (uint256)",
+  "function convertToAssets(uint256) view returns (uint256)",
+  "function previewDeposit(uint256) view returns (uint256)",
+  "function withdrawVerdict(uint256) view returns (uint8 v, uint8 a, uint8 b)",
+  "function drawdownVerdict() view returns (uint8 v, uint8 a, uint8 b)",
+  "function epochState() view returns (tuple(uint64 id, uint256 startAssets, uint256 outflow, uint256 startPrice, uint256 hwm))",
+  "function throttleFeeBps() view returns (uint256)",
+  "function entryFeeBps() view returns (uint256)",
+  "function deposit(uint256 assets, address receiver) returns (uint256)",
+  "function withdraw(uint256 assets, address receiver, address owner) returns (uint256)",
+  "error PolicyHalt(bytes32 slot, uint8 a, uint8 b)",
+  "error DepositsHalted(uint8 a, uint8 b)",
+  "error ERC4626ExceededMaxDeposit(address receiver, uint256 assets, uint256 max)",
+  "error ERC4626ExceededMaxWithdraw(address owner, uint256 assets, uint256 max)",
+  "error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)",
+  "error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)",
+];
+const REG_ABI = [
+  "function slots(bytes32) view returns (address spec, uint256 active, uint256 pending, uint64 pendingEta)",
+  "function candidates(uint256) view returns (bytes32 slot, address author, uint8 status, bool approved, bytes32 netlistHash, uint256 bond, uint256 rewards)",
+  "function processorUpgraded() view returns (bool)",
+  "function notifiedBy(address) view returns (uint256)",
+];
+const WOKB_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address, address) view returns (uint256)",
+  "function deposit() payable",
+  "function withdraw(uint256)",
+  "function approve(address, uint256) returns (bool)",
+];
+const VAULT_ERR = {
+  PolicyHalt: "HALT: that is more than today's withdrawal allowance. Try a smaller amount or come back tomorrow.",
+  DepositsHalted: "Deposits are paused by the drawdown circuit (the vault is more than ~10% below its high).",
+  ERC4626ExceededMaxDeposit: "That is more than the vault accepts right now (cap reached or deposits paused).",
+  ERC4626ExceededMaxWithdraw: "That is more than you can withdraw today. Use the 'Max out today' amount.",
+  ERC20InsufficientBalance: "Not enough balance for that amount.",
+  ERC20InsufficientAllowance: "The approval step did not complete. Try again.",
+};
+const SLOT_NAMES = ["WITHDRAW", "DRAWDOWN", "ALLOCATION"];
+const V = { st: null };
+
+/// Plain-language text for common wallet/RPC failures that are not contract errors.
+function friendlyWalletError(e) {
+  const m = `${e?.shortMessage || ""} ${e?.message || ""} ${e?.info?.error?.message || ""}`.toLowerCase();
+  if (m.includes("insufficient funds")) return "Your wallet doesn't have enough OKB for this amount plus gas.";
+  if (m.includes("user rejected") || m.includes("user denied") || e?.code === 4001 || e?.code === "ACTION_REJECTED") return "You cancelled it in your wallet.";
+  if (m.includes("switch your wallet")) return "Switch your wallet to X Layer (chain 196).";
+  return e?.shortMessage || e?.reason || e?.message || "failed";
+}
+
+function errNameFrom(e, abi) {
+  if (e?.revert?.name) return e.revert.name;
+  const iface = new ethers.Interface(abi);
+  let blob = "";
+  try { blob = JSON.stringify(e, Object.getOwnPropertyNames(e || {})); } catch (_) { blob = String(e); }
+  for (const hex of blob.match(/0x[0-9a-fA-F]{8,}/g) || []) {
+    try { const p = iface.parseError(hex); if (p) return p.name; } catch (_) {}
+  }
+  return null;
+}
+
+async function vaultRead() {
+  if (!CFG.vault || !CFG.registry) {
+    $("vPhase").textContent = "launches with phase 2";
+    $("vNote").textContent = "The vault and rule registry are built and fully rehearsed on a mainnet fork. They go live once circuits #2 and #3 are taped out.";
+    ["vTvl", "vPrice", "vRoom", "vToday", "vDep", "vRules"].forEach((id) => ($(id).textContent = "–"));
+    $("vSlots").innerHTML = '<tr><td>Not deployed yet</td><td>Circuit #1 is live; #2 and #3 are ready to tape out.</td></tr>';
+    $("vConnect").disabled = true;
+    $("vConnect").textContent = "Opens when the vault launches";
+    return;
+  }
+  try {
+    const p = await getProvider();
+    const v = new ethers.Contract(CFG.vault, VAULT_ABI, p);
+    const r = new ethers.Contract(CFG.registry, REG_ABI, p);
+    const [tvl, price, cap, dd, ep, upgraded, slotRows] = await Promise.all([
+      v.totalAssets(), v.sharePrice(), v.depositCap(), v.drawdownVerdict(), v.epochState(), r.processorUpgraded(),
+      Promise.all(SLOT_NAMES.map((n) => r.slots(ethers.encodeBytes32String(n)))),
+    ]);
+    const live = slotRows.filter((s) => s.active > 0n).length;
+    const ddv = Number(dd[0]);
+    const base = ep.startAssets > tvl ? ep.startAssets : tvl; // same base the contract uses
+    const today = base > 0n ? Number((ep.outflow * 10000n) / base) / 100 : 0;
+    V.st = { ddv };
+    $("vPhase").textContent = upgraded ? "TapeOut upgraded: safety mode" : live === 3 ? "all rules live" : `${live} of 3 rules live`;
+    $("vTvl").textContent = okb(tvl);
+    $("vPrice").textContent = Number(ethers.formatEther(price)).toFixed(6);
+    $("vRoom").textContent = okb(tvl >= cap ? 0n : cap - tvl);
+    $("vToday").textContent = `${today.toFixed(1)}%`;
+    $("vDep").textContent = ddv >= 2 ? "paused" : ddv === 1 ? "open (de-risk)" : "open";
+    $("vRules").textContent = `${live} / 3`;
+    $("vNote").innerHTML = (upgraded
+      ? "TapeOut has changed its processor code, so the vault stopped trusting circuit verdicts: withdrawals stay open, deposits pause until the curator reviews the change. "
+      : "Share price starts at 1 and rises only if the vault earns; entry fees go to rule designers, not to the price. ")
+      + `Vault: <a class="mono" href="${CFG.explorer}/address/${CFG.vault}" target="_blank" rel="noopener">${short(CFG.vault)}</a> · Registry: <a class="mono" href="${CFG.explorer}/address/${CFG.registry}" target="_blank" rel="noopener">${short(CFG.registry)}</a>`;
+
+    const rows = [];
+    for (let i = 0; i < 3; i++) {
+      const s = slotRows[i];
+      let cell = "empty";
+      if (s.active > 0n) {
+        const c = await r.candidates(s.active);
+        cell = `circuit #${s.active} · author <span class="mono">${short(c.author)}</span> · bond ${fmt(c.bond)} STEGO · unclaimed rewards ${okb(c.rewards, 5).replace("OKB", "WOKB")}`;
+      }
+      if (s.pending > 0n) cell += ` · pending #${s.pending} (can go live ${new Date(Number(s.pendingEta) * 1000).toLocaleString()})`;
+      rows.push(`<tr><td>${SLOT_NAMES[i]}</td><td>${cell}</td></tr>`);
+    }
+    $("vSlots").innerHTML = rows.join("");
+    if (N.account) await vaultSeat();
+  } catch (e) {
+    $("vNote").textContent = "Could not read the vault (RPC busy). Retrying shortly.";
+  }
+}
+
+async function vaultSeat() {
+  if (!CFG.vault) return;
+  const v = new ethers.Contract(CFG.vault, VAULT_ABI, await getProvider());
+  const [shares, max] = await Promise.all([v.balanceOf(N.account), v.maxWithdraw(N.account)]);
+  const assets = shares > 0n ? await v.convertToAssets(shares) : 0n;
+  $("vMine").textContent = okb(assets, 5);
+  $("vMax").textContent = okb(max, 5);
+  $("vDepBtn").disabled = V.st && V.st.ddv >= 2;
+  $("vDepHint").textContent = V.st && V.st.ddv >= 2 ? "Deposits are paused by the drawdown circuit." : "Three wallet steps: wrap OKB → approve → deposit. A 0.1% entry fee goes to the rule designers.";
+  $("vWdBtn").disabled = shares === 0n;
+  vaultQuote();
+}
+
+let vQuoteTimer = null;
+function vaultQuote() {
+  clearTimeout(vQuoteTimer);
+  vQuoteTimer = setTimeout(async () => {
+    if (!CFG.vault) return;
+    const raw = $("vWdAmt").value;
+    if (!raw || Number(raw) <= 0) { $("vWdQuote").textContent = "Enter an amount to see the circuit's verdict."; return; }
+    try {
+      const amt = ethers.parseEther(raw);
+      const v = new ethers.Contract(CFG.vault, VAULT_ABI, await getProvider());
+      const [q, bps] = await Promise.all([v.withdrawVerdict(amt), v.throttleFeeBps()]);
+      const verdict = Number(q[0]);
+      $("vWdQuote").innerHTML = verdict >= 2
+        ? `<span class="bad-t">HALT</span>: over today's allowance. See "Max out today". (Circuit input A=${q[1]}, B=${q[2]})`
+        : verdict === 1
+          ? `<span class="bad-t">THROTTLE</span>: you receive ${okb(amt, 5)} and pay a ${Number(bps) / 100}% fee in shares, which stays with the remaining depositors. (A=${q[1]}, B=${q[2]})`
+          : `<span class="ok-t">ALLOW</span>: you receive ${okb(amt, 5)}, no fee. (A=${q[1]}, B=${q[2]})`;
+    } catch (_) { $("vWdQuote").textContent = "Enter a valid amount."; }
+  }, 250);
+}
+
+async function vaultSend(label, steps) {
+  try {
+    const net = await N.signer.provider.getNetwork();
+    if (net.chainId !== 196n) throw new Error("Switch your wallet to X Layer (chain 196).");
+    for (const [i, [name, fn]] of steps.entries()) {
+      $("vTx").textContent = `${label} step ${i + 1}/${steps.length} (${name}): confirm in your wallet…`;
+      const tx = await fn();
+      if (!tx) continue;
+      $("vTx").innerHTML = `${label} step ${i + 1}/${steps.length} (${name}): waiting… <a href="${CFG.explorer}/tx/${tx.hash}" target="_blank" rel="noopener">view</a>`;
+      await tx.wait();
+    }
+    $("vTx").textContent = `${label}: done ✓`;
+    await vaultRead();
+  } catch (e) {
+    const name = errNameFrom(e, VAULT_ABI);
+    $("vTx").textContent = `${label} failed: ${(name && VAULT_ERR[name]) || friendlyWalletError(e)}`;
+  }
+}
+
+$("vConnect").onclick = async () => {
+  if (!N.account) await nerveConnect();
+  if (!N.account) return;
+  $("vConnect").style.display = "none";
+  $("vSeat").style.display = "";
+  await vaultSeat();
+};
+$("vWdAmt").addEventListener("input", vaultQuote);
+$("vDepBtn").onclick = () => {
+  const amt = ethers.parseEther($("vDepAmt").value || "0");
+  const w = new ethers.Contract(CFG.wokb, WOKB_ABI, N.signer);
+  const v = new ethers.Contract(CFG.vault, VAULT_ABI, N.signer);
+  vaultSend("Deposit", [
+    ["wrap OKB", async () => { const have = await w.balanceOf(N.account); return have >= amt ? null : w.deposit({ value: amt - have }); }],
+    ["approve", async () => ((await w.allowance(N.account, CFG.vault)) >= amt ? null : w.approve(CFG.vault, amt))],
+    ["deposit", () => v.deposit(amt, N.account)],
+  ]);
+};
+$("vWdBtn").onclick = () => {
+  const amt = ethers.parseEther($("vWdAmt").value || "0");
+  const w = new ethers.Contract(CFG.wokb, WOKB_ABI, N.signer);
+  const v = new ethers.Contract(CFG.vault, VAULT_ABI, N.signer);
+  vaultSend("Withdraw", [
+    ["withdraw", () => v.withdraw(amt, N.account, N.account)],
+    ["unwrap to OKB", () => w.withdraw(amt)],
+  ]);
+};
+setTimeout(vaultRead, 2400);
+setInterval(vaultRead, 30000);
+
+$("sA").addEventListener("input", onSlide);
+$("sB").addEventListener("input", onSlide);
+onSlide();
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "stego-circuits",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-sim": "node scripts/check-simulator.mjs"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  }
+}
