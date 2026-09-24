@@ -6,7 +6,8 @@ A vault whose risk rules are **TapeOut circuits**. Before every deposit, withdra
 |---|---|
 | `circuits/` | NAND netlist generator, simulator (bit-exact with on-chain `eval`), policy definitions, exhaustive proofs |
 | `contracts/` | `PolicyRegistry`, `StegoVault`, spec contracts, Foundry tests + X Layer fork test, deploy scripts |
-| `contracts/src/NerveSeason.sol` | Nerve: a bank-run game whose exit price is set by live circuit #1. Stayers split the fees; tickets burn STEGO. |
+| `contracts/src/NerveSeason.sol` | Nerve Season 1 (as deployed): a no-loss prize game whose exit price is set by live circuit #1. Stayers split the pot; tickets and boosts burn STEGO. |
+| `contracts/src/NerveSeason2.sol` | Season 2+: adds the diamond-hands bonus (never leave, get +20% weight) and an on-chain leaderboard. |
 | `circuits/scripts/check-candidate.mjs` | Designer seasons: proves a community circuit safe as a Nerve exit rule (all 65,536 inputs + on-chain cross-check) |
 | `web/index.html` | Demo dashboard: one static file, live X Layer data, no backend. Open it directly or host it anywhere. |
 | `LAUNCH_CHECKLIST.md` | Exact launch commands in order for the current wallet budget, all rehearsed |

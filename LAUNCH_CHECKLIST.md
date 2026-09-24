@@ -59,6 +59,14 @@ cast send 0xNERVE "fund()" --value 0.09ether --rpc-url https://xlayerrpc.okx.com
 ## Designer seasons (for Season 2+)
 Pick a community circuit, check it with `cd circuits && node scripts/check-candidate.mjs <id>`, then deploy the next season with `NERVE_EXIT_RULE_CIRCUIT=<id>` added to the step-3 command. Its owner earns the 10% designer cut.
 
+## Season 2: 48-hour sprint with the diamond-hands bonus (after Season 1 ends on 1 Oct)
+NerveSeason2 adds a +20% pot-weight bonus for players who never leave, plus an on-chain player list (the site shows a leaderboard automatically). Joins stay open 24 h, and the season ends after 48 h.
+```powershell
+$env:PROCESSOR="0x0d90BA20B57D63b8eEA92d674ef87284B2EB290C"
+forge script script/Stego.s.sol:DeployNerve2 --rpc-url https://xlayerrpc.okx.com --account stego-deployer --broadcast --slow
+```
+Then set `nerve:` in `web/index.html` to the new address, `git push`, fund the pot (`cast send <NERVE2> "fund()" --value <amount>ether ...`), and promote. It must end before the 6 Oct deadline.
+
 ## After the season ends
 - Claim your seat (if any) and the 10% designer cut on the website (`Claim`), or run `cast send 0xNERVE "claimDesigner()" --rpc-url https://xlayerrpc.okx.com --account 0xstego-deployer`.
 - If nobody else played, all of the season fund comes back to you (as the only stayer and/or as designer).

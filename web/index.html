@@ -211,7 +211,7 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
   <div class="hero">
     <h1>Vault risk rules, etched into silicon on X Layer.</h1>
     <p>Stego vaults obey NAND circuits taped out on TapeOut. Every withdrawal, deposit and rebalance asks a circuit for a verdict through <span class="mono">eval()</span>. Every circuit is proven correct over all 65,536 inputs. Everything on this page is read live from X Layer mainnet.</p>
-    <p class="cta"><a href="#nerve"><b>Play Nerve, the bank-run game →</b></a> &nbsp;·&nbsp; New to this? <a href="#faq">Read the plain-language FAQ</a>. No crypto or chip knowledge needed.</p>
+    <p class="cta"><a href="#nerve"><b>Play Nerve: keep your deposit, win a share of the pot →</b></a> &nbsp;·&nbsp; New to this? <a href="#faq">Read the plain-language FAQ</a>. No crypto or chip knowledge needed.</p>
     <div class="tiles">
       <div class="tile"><div class="k">Processor</div><div class="v" id="tProc">…</div><div class="s mono" id="tProcAddr">&nbsp;</div></div>
       <div class="tile"><div class="k">Circuits taped out</div><div class="v" id="tCirc">…</div><div class="s" id="tCircS">&nbsp;</div></div>
@@ -221,8 +221,8 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
   </div>
 
   <section id="nerve">
-    <h2><span id="nTitle">Nerve: Season 1</span>, the bank-run game</h2>
-    <p class="sub">Put in a small amount of OKB. Anyone can leave at any time, but <b>the live circuit sets the price of leaving</b>, and every fee goes into a pot. When the season ends, everyone who held their nerve gets their deposit back plus a share of the pot.</p>
+    <h2><span id="nTitle">Nerve: Season 1</span>: keep your deposit, play for the pot</h2>
+    <p class="sub">A no-loss prize game: <b>your deposit always comes back to you</b>. Everyone who stays to the end splits a sponsored pot. The only costs are the one-time ticket (≈0.0013 OKB) and a fee if you leave early, set by the live circuit, and those fees make the pot bigger for everyone who holds their nerve.</p>
     <div class="steps3">
       <div class="step"><div class="st live">1 · Join</div><h3>Deposit 0.01–0.05 OKB</h3><p>Joining also mints and burns a 10-STEGO ticket in the same transaction (<span id="nTicket">~0.0013</span> OKB). Top-ups need no new ticket.</p></div>
       <div class="step"><div class="st ready">2 · Hold or fold</div><h3>Leaving costs you</h3><p>Calm day: 2% into the pot. Rush (THROTTLE): 10%. If today's exit allowance (~25% of the pool) is used up, you wait until tomorrow.</p></div>
@@ -251,6 +251,7 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
             <div><div class="k">Your deposit</div><div class="v" id="nMine">…</div></div>
             <div><div class="k">If you hold to the end</div><div class="v" id="nProj">…</div></div>
           </div>
+          <div class="hint" id="nShare"></div>
           <div class="act">
             <label for="nJoinAmt">Join / top up (OKB)</label>
             <div class="row2"><input id="nJoinAmt" type="number" min="0.01" max="0.05" step="0.001" value="0.05"><button class="btn" id="nJoinBtn" type="button">Join</button></div>
@@ -276,6 +277,14 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
           <div class="hint" id="nTx"></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section id="board" style="display:none">
+    <div class="card">
+      <h2>Leaderboard</h2>
+      <p class="sub" id="bSub">Everyone in this season, ranked by pot weight (deposit × time × boost × diamond bonus). 💎 = never left, so still keeping the diamond-hands bonus.</p>
+      <table class="facts"><thead><tr><td>#</td><td>Player</td><td>Deposit</td><td>Pot share</td></tr></thead><tbody id="bRows"></tbody></table>
     </div>
   </section>
 
@@ -483,10 +492,18 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
         <p>If you are the only depositor, you can only take out about a quarter of the vault per day. That's the same rule for everyone, and it's what protects people from a bank run.</p>
       </div></details>
 
+      <details><summary>Is Nerve really "no-loss"?</summary><div class="ans">
+        <p>Your deposit is always yours: when the season ends you claim it back in full, and nobody (not even the creator) can take it. What you can spend is the one-time ticket (≈0.0013 OKB, which burns 10 STEGO), a fee if you leave early (2% normally, 10% in a rush), any STEGO Boost you buy, and network gas (fractions of a cent). The prize is the pot: the sponsor's seed plus the early leavers' fees.</p>
+      </div></details>
+
       <details><summary>How does the Nerve game work, and can I lose money?</summary><div class="ans">
         <p>You deposit 0.01–0.05 OKB. If you <b>stay until the season ends</b>, you get your full deposit back <b>plus</b> a share of the pot. Shares are weighted by amount × time, so the earlier you join, the bigger your share. Before you join, the page shows exactly what you'd get if everyone stays. If you <b>leave early</b>, you pay a fee into the pot: 2% on a calm day, 10% during a rush. If too many people leave on the same day (about a quarter of the pool), the circuit says HALT and you wait until tomorrow.</p>
         <p>What you can lose: the one-time ticket (about 0.0013 OKB, which buys and burns 10 STEGO) and any fee you pay by leaving early. Nobody, including the creator, can take the deposits. The contract has no admin at all.</p>
         <p>Winning pot shares depend on other people leaving early, so the pot may be small if everyone holds.</p>
+      </div></details>
+
+      <details><summary>What is the diamond-hands bonus?</summary><div class="ans">
+        <p>From Season 2, players who never leave during the season get extra pot weight (for example +20%). Leaving even once, even a tiny amount, forfeits it for the rest of the season. The leaderboard marks bonus holders with 💎.</p>
       </div></details>
 
       <details><summary>What is STEGO Boost?</summary><div class="ans">
@@ -659,6 +676,22 @@ const ZH = {
   "Circuit #1 is live; #2 and #3 are ready to tape out.": "电路 #1 已上线；#2 和 #3 待流片。",
   "Loading…": "加载中…",
   "Loading on-chain story…": "正在加载链上故事…",
+  ": keep your deposit, play for the pot": "：保本玩法，赢取奖池",
+  "A no-loss prize game:": "一个保本的奖池游戏：",
+  "your deposit always comes back to you": "你的本金永远会回到你手里",
+  ". Everyone who stays to the end splits a sponsored pot. The only costs are the one-time ticket (≈0.0013 OKB) and a fee if you leave early, set by the live circuit, and those fees make the pot bigger for everyone who holds their nerve.": "。坚持到最后的人一起瓜分赞助奖池。唯一的成本是一次性门票（约 0.0013 OKB），以及提前离场时由链上电路决定的费用；这些费用会让奖池变得更大，全部归坚持者。",
+  "Play Nerve: keep your deposit, win a share of the pot →": "玩 Nerve：本金不亏，赢取奖池份额 →",
+  "Leaderboard": "排行榜",
+  "Everyone in this season, ranked by pot weight (deposit × time × boost × diamond bonus). 💎 = never left, so still keeping the diamond-hands bonus.": "本赛季所有玩家，按奖池权重排名（存款 × 时间 × 加成 × 钻石手奖励）。💎 = 从未离场，仍保有钻石手奖励。",
+  "#": "#",
+  "Player": "玩家",
+  "Pot share": "奖池份额",
+  "(you)": "（你）",
+  "No players yet. Be the first: early joiners get the biggest share.": "还没有玩家。抢先加入：越早加入份额越大。",
+  "Is Nerve really \"no-loss\"?": "Nerve 真的是「保本」的吗？",
+  "Your deposit is always yours: when the season ends you claim it back in full, and nobody (not even the creator) can take it. What you can spend is the one-time ticket (≈0.0013 OKB, which burns 10 STEGO), a fee if you leave early (2% normally, 10% in a rush), any STEGO Boost you buy, and network gas (fractions of a cent). The prize is the pot: the sponsor's seed plus the early leavers' fees.": "你的本金始终属于你：赛季结束时可以全额领回，任何人（包括创建者）都拿不走。你可能花掉的只有：一次性门票（约 0.0013 OKB，会销毁 10 枚 STEGO）、提前离场的费用（平时 2%，挤兑时 10%）、你购买的 STEGO 加成，以及网络 gas（不到一分钱）。奖品就是奖池：赞助的种子资金，加上提前离场者支付的费用。",
+  "What is the diamond-hands bonus?": "什么是钻石手奖励？",
+  "From Season 2, players who never leave during the season get extra pot weight (for example +20%). Leaving even once, even a tiny amount, forfeits it for the rest of the season. The leaderboard marks bonus holders with 💎.": "从第二季开始，整个赛季从不离场的玩家可以获得额外的奖池权重（例如 +20%）。只要离场一次，哪怕金额很小，本赛季就会失去这项奖励。排行榜上用 💎 标记保有奖励的玩家。",
   "The bank-run game, using live circuit #1 as its exit rule. Joins close 28 Sep, 18:24 UTC+7; the season ends 1 Oct, 18:24 UTC+7.": "挤兑博弈游戏，以链上电路 #1 作为离场规则。9 月 28 日 18:24（UTC+7）停止加入，10 月 1 日 18:24（UTC+7）赛季结束。",
   "Live policy: WITHDRAW_GUARD_V1 (circuit #1)": "链上规则：WITHDRAW_GUARD_V1（电路 #1）",
   "Move the sliders to set the vault's state. The page evaluates the live circuit on mainnet, and separately re-simulates the netlist bytes it downloaded from the chain, gate by gate. Both must agree.": "拖动滑块设置金库状态。页面会在主网上调用链上电路求值，同时把从链上下载的网表逐门重新模拟一遍。两者必须一致。",
@@ -890,6 +923,9 @@ const ZH_PATTERNS = [
   [/^Costs (.+) OKB \((\d+) STEGO minted and burned\)\. If everyone stays, it adds about (.+) OKB to your pot share:$/, (m) => `费用 ${m[1]} OKB（铸造并销毁 ${m[2]} 枚 STEGO）。如果大家都坚持，你的奖池份额约增加 ${m[3]} OKB：`],
   [/^\+(\d+)% \((\d+) STEGO\)$/, (m) => `+${m[1]}%（${m[2]} 枚 STEGO）`],
   [/^Connected: (.+)$/, (m) => `已连接：${m[1]}`],
+  [/^Stego Nerve - Season (\d+)$/, (m) => `Stego Nerve · 第 ${m[1]} 季`],
+  [/^\(you\)( 💎)?$/, (m) => `（你）${m[1] || ""}`],
+  [/^Your share of the pot: (.+)% of all pot weight(.*)$/, (m) => `你的奖池份额：占全部奖池权重的 ${m[1]}%` + m[2].replace(/ · 💎 bonus lost \(you left once this season\)/, " · 💎 奖励已失去（本赛季你离场过）").replace(/ · 💎 diamond hands: keeping your \+(.+)% bonus/, " · 💎 钻石手：保有 +$1% 奖励")],
   [/^: over today's allowance\. See "Max out today"\. \(Circuit input A=(\d+), B=(\d+)\)$/, (m) => `：超过今日额度，请看「今日最多可取」。（电路输入 A=${m[1]}，B=${m[2]}）`],
   [/^: you receive (.+) OKB and pay a (.+)% fee in shares, which stays with the remaining depositors\. \(A=(\d+), B=(\d+)\)$/, (m) => `：你收到 ${m[1]} OKB，并以份额支付 ${m[2]}% 手续费，费用留给其余存款人。（A=${m[3]}，B=${m[4]}）`],
   [/^: you receive (.+) OKB, no fee\. \(A=(\d+), B=(\d+)\)$/, (m) => `：你收到 ${m[1]} OKB，无手续费。（A=${m[2]}，B=${m[3]}）`],
@@ -1307,6 +1343,14 @@ const NERVE_ABI = [
   "function boostBps(address) view returns (uint256)",
   "function boostBurned() view returns (uint256)",
   "function circuitId() view returns (uint256)",
+  "function points(address) view returns (uint256)",
+  "function totalPoints() view returns (uint256)",
+  "function totalWeight() view returns (uint256)",
+  "function weightOf(address) view returns (uint256)",
+  "function exited(address) view returns (bool)",
+  "function diamondBonusBps() view returns (uint256)",
+  "function playerCount() view returns (uint256)",
+  "function standings(uint256, uint256) view returns (address[] who, uint256[] deposit, uint256[] weight, bool[] diamond)",
   "error NotPlaying()", "error BoostCap()", "error WrongValue(uint256 sent, uint256 need)",
   "function exit(uint256)",
   "function claim()",
@@ -1376,6 +1420,7 @@ async function nerveRead() {
     $("nNote").innerHTML = `Players in = still holding / ever joined. Today's exits = share of the pool that left today; around 10% is calm, above 25% the circuit HALTs. ${fmt(burned)} STEGO burned as tickets, ${fmt(bBurned)} as boosts. Exit rule: circuit #${cid}${designer ? ` designed by <span class="mono">${short(designer)}</span>` : ""}. Contract: <a class="mono" href="${CFG.explorer}/address/${CFG.nerve}" target="_blank" rel="noopener">${short(CFG.nerve)}</a>`;
     if (N.account) await nerveSeat();
     nerveJoinQuote();
+    nerveBoard();
   } catch (e) {
     $("nNote").textContent = "Could not read the season (RPC busy). Retrying shortly.";
   }
@@ -1387,6 +1432,21 @@ async function nerveSeat() {
   const [mine, proj, ticket] = await Promise.all([c.principal(N.account), c.projectedPayout(N.account), c.hasTicket(N.account)]);
   $("nMine").textContent = okb(mine);
   $("nProj").textContent = okb(proj[0] + proj[1]);
+  if (mine > 0n) {
+    const v2 = await c.totalWeight().then((tw) => ({ tw }), () => null);
+    let myW, tw, diamondLine = "";
+    if (v2) {
+      [myW, tw] = [await c.weightOf(N.account), v2.tw];
+      const [left, bonus] = await Promise.all([c.exited(N.account), c.diamondBonusBps()]);
+      diamondLine = left ? ` · 💎 bonus lost (you left once this season)` : ` · 💎 diamond hands: keeping your +${Number(bonus) / 100}% bonus`;
+    } else {
+      [myW, tw] = await Promise.all([c.points(N.account), c.totalPoints()]);
+    }
+    const pct = tw > 0n ? Number((myW * 10000n) / tw) / 100 : 0;
+    $("nShare").textContent = `Your share of the pot: ${pct.toFixed(1)}% of all pot weight` + diamondLine;
+  } else {
+    $("nShare").textContent = "";
+  }
   const now = await chainNow();
   const ended = N.st && now >= N.st.end;
   $("nClaimBtn").style.display = ended && mine > 0n ? "" : "none";
@@ -1422,6 +1482,31 @@ async function nerveBoostQuote() {
     $("nBoostQuote").innerHTML = `Costs ${okb(cost, 5)} (${units * 10} STEGO minted and burned). If everyone stays, it adds about ${okb(extra, 5)} to your pot share: ` +
       `<span class="${extra >= cost ? "ok-t" : "bad-t"}">${extra >= cost ? "worth it right now" : "costs more than it adds right now"}</span>. More players joining changes this.`;
   } catch (_) { $("nBoostQuote").textContent = ""; }
+}
+
+async function nerveBoard() {
+  if (!CFG.nerve) return;
+  try {
+    const c = new ethers.Contract(CFG.nerve, NERVE_ABI, await getProvider());
+    const n = Number(await c.playerCount());
+    const tw = await c.totalWeight();
+    const rows = [];
+    for (let off = 0; off < n; off += 100) {
+      const r = await c.standings(off, 100);
+      for (let i = 0; i < r.who.length; i++) rows.push({ who: r.who[i], dep: r.deposit[i], w: r.weight[i], dia: r.diamond[i] });
+    }
+    const live = rows.filter((r) => r.dep > 0n).sort((a, b) => (b.w > a.w ? 1 : b.w < a.w ? -1 : 0));
+    $("board").style.display = "";
+    $("bRows").innerHTML = live.length
+      ? live.map((r, i) => {
+          const me = N.account && r.who.toLowerCase() === N.account.toLowerCase();
+          const pct = tw > 0n ? (Number((r.w * 10000n) / tw) / 100).toFixed(1) : "0.0";
+          return `<tr${me ? ' style="font-weight:700"' : ""}><td>${i + 1}</td><td><span class="mono">${short(r.who)}</span>${me ? " (you)" : ""}${r.dia ? " 💎" : ""}</td><td>${okb(r.dep)}</td><td>${pct}%</td></tr>`;
+        }).join("")
+      : '<tr><td colspan="4">No players yet. Be the first: early joiners get the biggest share.</td></tr>';
+  } catch (_) {
+    $("board").style.display = "none"; // Season 1 contract has no on-chain player list
+  }
 }
 
 let joinQuoteTimer = null;

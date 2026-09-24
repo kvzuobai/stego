@@ -8,6 +8,7 @@ import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {PolicyRegistry} from "../src/PolicyRegistry.sol";
 import {StegoVault} from "../src/StegoVault.sol";
 import {NerveSeason, IProtocolFee} from "../src/NerveSeason.sol";
+import {NerveSeason2} from "../src/NerveSeason2.sol";
 import {ITapeOutProcessor} from "../src/interfaces/ITapeOutProcessor.sol";
 import {IBeacon} from "@openzeppelin/contracts/proxy/beacon/IBeacon.sol";
 import {WithdrawEnvelopeV1, DrawdownEnvelopeV1, AllocationEnvelopeV1} from "../src/specs/PolicySpecs.sol";
@@ -418,6 +419,48 @@ contract DeployNerve is StegoScript {
         console2.log("joinDeadline =", p.joinDeadline);
         console2.log("seasonEnd    =", p.seasonEnd);
         console2.log("ticket cost  =", nerve.ticketCost());
+    }
+}
+
+/// Season 2+ (NerveSeason2): sprint defaults and the diamond-hands bonus, plus an on-chain player list.
+/// PROCESSOR from env; optional NERVE_SEASON_NAME ("Stego Nerve - Season 2"), NERVE_EXIT_RULE_CIRCUIT (1),
+/// NERVE_JOIN_HOURS (24), NERVE_SEASON_HOURS (48), NERVE_DIAMOND_BONUS_BPS (2000 = +20%), and the same
+/// NERVE_* deposit/fee settings as DeployNerve.
+contract DeployNerve2 is StegoScript {
+    function run() external {
+        _requireCreator();
+        ITapeOutProcessor processor = ITapeOutProcessor(vm.envAddress("PROCESSOR"));
+        require(FACTORY.isCPU(address(processor)), "not a factory processor");
+        NerveSeason2.Params memory p = NerveSeason2.Params({
+            name: vm.envOr("NERVE_SEASON_NAME", string("Stego Nerve - Season 2")),
+            processor: processor,
+            factory: IProtocolFee(address(FACTORY)),
+            beacon: BEACON,
+            circuitId: vm.envOr("NERVE_EXIT_RULE_CIRCUIT", uint256(1)),
+            ticketTransistors: vm.envOr("NERVE_TICKET", uint256(10)),
+            joinDeadline: uint64(block.timestamp + vm.envOr("NERVE_JOIN_HOURS", uint256(24)) * 1 hours),
+            seasonEnd: uint64(block.timestamp + vm.envOr("NERVE_SEASON_HOURS", uint256(48)) * 1 hours),
+            minDeposit: vm.envOr("NERVE_MIN_DEPOSIT_WEI", uint256(0.01 ether)),
+            maxPerWallet: vm.envOr("NERVE_MAX_PER_WALLET_WEI", uint256(0.05 ether)),
+            seasonCap: vm.envOr("NERVE_SEASON_CAP_WEI", uint256(2 ether)),
+            baseFeeBps: vm.envOr("NERVE_BASE_FEE_BPS", uint256(200)),
+            throttleFeeBps: vm.envOr("NERVE_THROTTLE_FEE_BPS", uint256(1000)),
+            designerCutBps: vm.envOr("NERVE_DESIGNER_CUT_BPS", uint256(1000)),
+            envelope: IPolicySpec(vm.envOr("NERVE_ENVELOPE", address(0))),
+            diamondBonusBps: vm.envOr("NERVE_DIAMOND_BONUS_BPS", uint256(2000))
+        });
+        require(p.baseFeeBps <= p.throttleFeeBps, "NERVE_BASE_FEE_BPS must be <= NERVE_THROTTLE_FEE_BPS");
+        require(p.joinDeadline <= p.seasonEnd, "NERVE_JOIN_HOURS must be <= NERVE_SEASON_HOURS");
+        require(p.diamondBonusBps <= 5000, "NERVE_DIAMOND_BONUS_BPS must be <= 5000");
+        console2.log("exit-rule circuit", p.circuitId);
+        vm.startBroadcast();
+        if (address(p.envelope) == address(0)) p.envelope = new WithdrawEnvelopeV1();
+        NerveSeason2 nerve = new NerveSeason2(p);
+        vm.stopBroadcast();
+        console2.log("NERVE        =", address(nerve));
+        console2.log("joinDeadline =", p.joinDeadline);
+        console2.log("seasonEnd    =", p.seasonEnd);
+        console2.log("diamond bonus bps", p.diamondBonusBps);
     }
 }
 
