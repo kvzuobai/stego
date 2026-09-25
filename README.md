@@ -14,6 +14,9 @@ A vault whose risk rules are **TapeOut circuits**. Before every deposit, withdra
 
 **Live site:** https://stego-jade.vercel.app/ · **Source:** https://github.com/kvzuobai/stego · **Deployed contracts and transaction evidence:** [DEPLOYMENTS.md](DEPLOYMENTS.md)
 
+## Outside usage
+On 2026-09-25, an outside wallet ([`0x03aE…19b5`](https://www.oklink.com/xlayer/address/0x03aEbF90342f923C9438f9Cb55ECF8A4dd8719b5)) bought 1,000 STEGO directly from the processor for 0.0667 OKB ([transaction](https://www.oklink.com/xlayer/tx/0x5f50c9ef997b360f0df732717623e53ac7e50a7382772c776c18105e201faddb)). It has no connection to the deployment wallet. Full evidence is in [DEPLOYMENTS.md](DEPLOYMENTS.md).
+
 ## Build and test
 ```bash
 # circuits (Node 18+)

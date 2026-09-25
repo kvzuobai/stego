@@ -863,6 +863,9 @@ const ZH = {
   "isCPU = true (created through the TapeOut factory)": "isCPU = true（通过 TapeOut 工厂创建）",
   "Transistors (ERC-1155)": "晶体管（ERC-1155）",
   "Deployment wallet": "部署钱包",
+  "Outside supporter": "外部支持者",
+  "bought 1,000 STEGO for 0.0667 OKB on 25 Sep 2026 ·": "于 2026 年 9 月 25 日花 0.0667 OKB 购买了 1,000 枚 STEGO ·",
+  "transaction": "交易",
   "Supply cap / price": "供应上限 / 价格",
   "Circuit #1 netlist": "电路 #1 网表",
   "Stego · built on": "Stego · 基于",
@@ -1286,6 +1289,7 @@ async function load() {
       ["Processor", link(CFG.processor)],
       ["Transistors (ERC-1155)", link(CFG.transistors)],
       ["Deployment wallet", link(CFG.creator)],
+      ["Outside supporter", `<a class="mono" href="${CFG.explorer}/address/0x03aEbF90342f923C9438f9Cb55ECF8A4dd8719b5" target="_blank" rel="noopener">0x03aE…19b5</a> bought 1,000 STEGO for 0.0667 OKB on 25 Sep 2026 · <a href="${CFG.explorer}/tx/0x5f50c9ef997b360f0df732717623e53ac7e50a7382772c776c18105e201faddb" target="_blank" rel="noopener">transaction</a>`],
       ["Supply cap / price", `${fmt(cap)} ${symbol} · ${ethers.formatEther(price)} OKB (immutable)`],
       ["Circuit #1 netlist", `<span class="mono">${nl.length / 2 - 1} bytes · keccak ${nlHash.slice(0, 18)}…</span>`],
     ];
