@@ -37,6 +37,11 @@ Deployed early as a rehearsal and never promoted: 0 players, 0 OKB, and it has n
 | Joins close / season ends | 2026-09-28 14:27 / 2026-09-30 14:27 (UTC+7) |
 | Rules | Deposit 0.001–0.05 OKB per wallet, 2 OKB cap; 10-STEGO ticket minted and burned on first join (0.00132 OKB); exit fee 2% ALLOW / 10% THROTTLE / HALT waits a day; stayers split the pot; 10% designer cut to the circuit #1 owner; no admin |
 
+## Outside usage (organic, not the deployment wallet)
+| When | Who | What | Tx |
+|---|---|---|---|
+| 2026-09-25 03:10 UTC | `0x03aEbF90342f923C9438f9Cb55ECF8A4dd8719b5` | Minted 1,000 STEGO directly (paid 0.06666 OKB) | `0x5f50c9ef997b360f0df732717623e53ac7e50a7382772c776c18105e201faddb` |
+
 ## Circuits
 | Id | Policy | Gates | Netlist hash | On-chain check |
 |---|---|---|---|---|
