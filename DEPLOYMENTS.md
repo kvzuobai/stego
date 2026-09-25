@@ -67,6 +67,10 @@ Circuits #1–#3 were proposed with 2,000 STEGO bonds each (6,000 locked) and ap
 All three slots are active: WITHDRAW = circuit #1, DRAWDOWN = #2, ALLOCATION = #3. The vault accepts deposits (cap 5 OKB).
 Transactions (blocks 71,570,582–71,570,586): `0x6973079801ee471d8f14b7303d4c970b16e9ea0a2623e2faba64e58b11d436a5`, `0x99f8771a8da8ebe8f8bea1048cee2f4953cc5060e4b843ce0665df2601a630b9`, `0x7488f68f3fa20a76055d442c695ab988d1ea1e208f68cab83b4d03e806375a55`
 
+## 25% commitment honoured (launch step 5, 2026-09-25)
+The creator withdrew 0.066 OKB of mint income (from the outside buyer) and streamed **0.1240635 OKB = exactly 25% of all STEGO mint proceeds (7,519 × 0.000066 OKB)** to the active policy authors. `PolicyRegistry.notifiedBy(creator)` = 0.1240635 OKB on-chain. The creator is currently the only author, so the rewards were claimed back.
+Transactions (blocks 71,570,803–71,570,815): withdraw `0x34a30737de75a9aaf00a551c188ee9334b52a5be0ec61fd9332653e034f34ca0`, wrap `0xd53b1e68…3f76`, approve `0xe1169f8d…f7c0`, notifyReward `0xa5834dc819aad6bc06f9d3ab70d7158ac2fe90ddb4abe41f41ec1a7a1b351964`, claimRewards ×3 `0xe6fbcd8e…be10` `0x953af7ca…7952` `0x3787f38c…4ca2`, unwrap `0x1af5da22…7b85`
+
 Re-check at any time:
 ```bash
 node scripts/verify-live.mjs 0x0d90BA20B57D63b8eEA92d674ef87284B2EB290C 1 WITHDRAW_GUARD_V1
