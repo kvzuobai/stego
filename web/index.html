@@ -275,6 +275,7 @@ footer { color: var(--ink-3); font-size: 13px; padding: 30px 0 50px; }
             <div class="hint">Goes to the players still in at the end (10% to the exit-rule designer). If nobody stays, it all goes to the designer.</div>
           </div>
           <button class="btn" id="nClaimBtn" type="button" style="display:none">Claim deposit + pot share</button>
+          <div class="act" id="nPast" style="display:none"></div>
           <div class="hint" id="nTx"></div>
         </div>
       </div>
@@ -688,6 +689,7 @@ const ZH = {
   "Player": "玩家",
   "Pot share": "奖池份额",
   "Share on X": "分享到 X",
+  "has ended. You can claim": "已结束，你可以领取",
   "(you)": "（你）",
   "No players yet. Be the first: early joiners get the biggest share.": "还没有玩家。抢先加入：越早加入份额越大。",
   "Is Nerve really \"no-loss\"?": "Nerve 真的是「保本」的吗？",
@@ -926,6 +928,8 @@ const ZH_PATTERNS = [
   [/^\+(\d+)% \((\d+) STEGO\)$/, (m) => `+${m[1]}%（${m[2]} 枚 STEGO）`],
   [/^Connected: (.+)$/, (m) => `已连接：${m[1]}`],
   [/^Stego Nerve - Season (\d+)$/, (m) => `Stego Nerve · 第 ${m[1]} 季`],
+  [/^has ended\. You can claim (.+) OKB\.$/, (m) => `已结束，你可以领取 ${m[1]} OKB。`],
+  [/^Claim from Stego Nerve - Season (\d+)$/, (m) => `领取第 ${m[1]} 季`],
   [/^\(you\)( 💎)?$/, (m) => `（你）${m[1] || ""}`],
   [/^Your share of the pot: (.+)% of all pot weight(.*)$/, (m) => `你的奖池份额：占全部奖池权重的 ${m[1]}%` + m[2].replace(/ · 💎 bonus lost \(you left once this season\)/, " · 💎 奖励已失去（本赛季你离场过）").replace(/ · 💎 diamond hands: keeping your \+(.+)% bonus/, " · 💎 钻石手：保有 +$1% 奖励")],
   [/^: over today's allowance\. See "Max out today"\. \(Circuit input A=(\d+), B=(\d+)\)$/, (m) => `：超过今日额度，请看「今日最多可取」。（电路输入 A=${m[1]}，B=${m[2]}）`],
@@ -1008,6 +1012,7 @@ const CFG = {
   registry: "0x0A184781674dc6dC6C689f72235a10A2d7D5B37d",
   nerve: "0x23AE0d6b490407c378a1496C6B834238Cc2D78Bd", // Stego Nerve - Season 1 (0xA5D3…F098 was a rehearsal, never promoted)
   vault: "0x784Ba316b123b7099631FB834D9aC2D6B31e8b75",
+  pastSeasons: [], // finished Nerve seasons; players can still claim from them here
   wokb: "0xe538905cf8410324e03A5A23C1c177a474D59b2b",
   explorer: "https://www.oklink.com/xlayer",
 };
@@ -1516,6 +1521,38 @@ async function nerveBoard() {
   }
 }
 
+/// Past seasons: let players claim what they still have in finished seasons.
+async function nervePast() {
+  const box = $("nPast");
+  if (!N.account || !CFG.pastSeasons || !CFG.pastSeasons.length) { box.style.display = "none"; return; }
+  const p = await getProvider();
+  const items = [];
+  for (const addr of CFG.pastSeasons) {
+    try {
+      const c = new ethers.Contract(addr, NERVE_ABI, p);
+      const [mine, proj, nm] = await Promise.all([c.principal(N.account), c.projectedPayout(N.account), c.name().catch(() => "Past season")]);
+      if (mine > 0n) items.push({ addr, total: proj[0] + proj[1], nm });
+    } catch (_) {}
+  }
+  box.style.display = items.length ? "" : "none";
+  box.innerHTML = items.map((it) => `<div class="hint"><b>${it.nm}</b> has ended. You can claim ${okb(it.total, 5)}.</div><button class="btn" type="button" data-past="${it.addr}">Claim from ${it.nm}</button>`).join("");
+  box.querySelectorAll("button[data-past]").forEach((b) => {
+    b.onclick = async () => {
+      const addr = b.dataset.past;
+      $("nTx").textContent = "Claim: confirm in your wallet…";
+      try {
+        const tx = await new ethers.Contract(addr, NERVE_ABI, N.signer).claim();
+        await tx.wait();
+        $("nTx").textContent = "Claim: done ✓";
+        nervePast();
+      } catch (e) {
+        const name = nerveErrName(e);
+        $("nTx").textContent = `Claim failed: ${(name && NERVE_ERR[name]) || friendlyWalletError(e)}`;
+      }
+    };
+  });
+}
+
 let joinQuoteTimer = null;
 function nerveJoinQuote() {
   clearTimeout(joinQuoteTimer);
@@ -1578,6 +1615,7 @@ async function nerveConnect() {
       $("nSeat").style.display = "";
       await nerveSeat();
     }
+    nervePast();
   } catch (e) {
     $("nTx").textContent = "Wallet connection was cancelled or failed.";
   }
