@@ -63,6 +63,10 @@ Launch step 1 (Phase2Safe) done 2026-09-24: 8 transactions (3 mint, 3 withdraw, 
 
 Circuits #1–#3 were proposed with 2,000 STEGO bonds each (6,000 locked) and approved by the curator. They can be activated after 2026-09-25 11:16 UTC (18:16 UTC+7).
 
+## Rules activated (launch step 4, 2026-09-25)
+All three slots are active: WITHDRAW = circuit #1, DRAWDOWN = #2, ALLOCATION = #3. The vault accepts deposits (cap 5 OKB).
+Transactions (blocks 71,570,582–71,570,586): `0x6973079801ee471d8f14b7303d4c970b16e9ea0a2623e2faba64e58b11d436a5`, `0x99f8771a8da8ebe8f8bea1048cee2f4953cc5060e4b843ce0665df2601a630b9`, `0x7488f68f3fa20a76055d442c695ab988d1ea1e208f68cab83b4d03e806375a55`
+
 Re-check at any time:
 ```bash
 node scripts/verify-live.mjs 0x0d90BA20B57D63b8eEA92d674ef87284B2EB290C 1 WITHDRAW_GUARD_V1
